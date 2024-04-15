@@ -18,6 +18,7 @@ For mer info, les her: https://docs.github.com/en/repositories/releasing-project
 
 ## Hvordan gjøre en commit?
 
+først bru kommandoen "git status" for å sjekke om du er på riktig branch. før du committer må du legge til filene du vil committe ved å bruke kommandoen "git add[filnavn]".
 eksempel på kommando: git commit -m "update the README.md with link to contributing guide"
 
 For mer info, les mer her: https://github.com/git-guides/git-commit
@@ -25,3 +26,7 @@ For mer info, les mer her: https://github.com/git-guides/git-commit
 ## Hvor ofte skal man gjøre en commit? 
 
 Så ofte som mulig. Her er det best å få oppdatert den felles kodebasen slik at ingen i prosjektet faller bak den nyeste versjonen og har utdatert kode som kan skape konklikter når man senere merger koden.
+
+## Har du gjort noe feil?
+
+Bruk kommandoen "git revert".
