@@ -12,6 +12,7 @@ A respository for tracking the changes and contributions made to the IELS2001 pr
 
 først bruk kommandoen "git status" for å sjekke om du er på riktig branch. før du committer må du legge til filene du vil committe ved å bruke kommandoen "git add[filnavn]".
 eksempel på kommando: git commit -m "update the README.md with link to contributing guide"
+Push dermed endringene til GitHub ved å bruke kommandoen "git push origin main". Da er alt ordnet! Andre vil da kunne se endringene ved å bruke kommandoen "git pull".
 
 For mer info, les mer her: https://github.com/git-guides/git-commit
 (eksempelet er via terminalen ved bruk av Git, som må konfigureres om man ikke har gjort dette enda) 
