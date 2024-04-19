@@ -5,14 +5,21 @@
 #include <PubSubClient.h>
 #include <Adafruit_GPS.h>
 #include <HardwareSerial.h>
+#include "Prosjekt.h" //vårt bibliotek for å rydde i koden :) nice 
+Prosjekt prosjekt;
 
-const char* ssid = "NTNU-IOT";
-const char* password = "";
+/// VARIABLER FOR WIFI_TILKOBLING ///
 
+const char* ssid = "Garfield party";
+const char* password = "Lasagnalover6969";
+
+/// VARIABLER FOR  MELDING GJENNOM WHATSAPP 
 // +international_country_code + phone number
 // Portugal +351, example: +351912345678
 String phoneNumber = "+4748230543";
 String apiKey = "4833002";
+String message = "HEI:)"; //denne kan endres til en mer utfyllende melding senere
+/// VARIABLER FOR MQTT ///
 
 // Legg til IP-adressen til MQTT broker
 const char* mqtt_server = "10.25.17.47";
@@ -29,8 +36,11 @@ float humidity = 0;
 // LED Pin
 const int ledPin = 4;
 
+/// VARIABLER FOR I2C-KOMMUNIKASJON ///
+
 byte kjoremodus = 0;
 
+/// VARIABLER FOR GPS-MODUL ///
 #define RXD2 16 //RX pin
 #define TXD2 17 //TX pin
 
@@ -46,78 +56,23 @@ Adafruit_GPS GPS(&GPSSerial);
 
 uint32_t timer = millis();
 
-
-
-void sendMessage(String message){
-
-  // Data to send with HTTP POST
-  String url = "https://api.callmebot.com/whatsapp.php?phone=" + phoneNumber + "&apikey=" + apiKey + "&text=" + urlEncode(message);    
-  HTTPClient http;
-  http.begin(url);
-
-  // Specify content-type header
-  http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-  
-  // Send HTTP POST request
-  int httpResponseCode = http.POST(url);
-  if (httpResponseCode == 200){
-    Serial.print("Message sent successfully");
-  }
-  else{
-    Serial.println("Error sending the message");
-    Serial.print("HTTP response code: ");
-    Serial.println(httpResponseCode);
-  }
-
-  // Free resources
-  http.end();
-}
-
-void setup_wifi() {
-  delay(10);
-  // Vi kobler oss på Wi-Fi
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-
-  WiFi.begin(ssid, password);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
-}
 void setup()
 {
   Serial.begin(115200);
 
-  setup_wifi();
+  prosjekt.connectWiFi(ssid, password); //kobler opp til Wi-Fi
+  prosjekt.sendMessages(message, phoneNumber, apiKey); // sender melding (denne funksjonen brukes da senere i programmet hvor man skal varsle brukeren) 
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
 
   pinMode(ledPin, OUTPUT);
-  // Send Message to WhatsAPP
-  sendMessage("Hello from ESP32!"); // kommenter ut denne linja om en skal laste opp koden til ESP flere ganger
-  Wire.begin(); // join i2c bus (address optional for master)
+  Wire.begin(); // join i2c bus (address optional for master) //
 
   //while (!Serial);  // uncomment to have the sketch wait until Serial is ready
 
-  // connect at 115200 so we can read the GPS fast enough and echo without dropping chars
-  // also spit it out
-  Serial.begin(115200);
-
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
-
   Serial.println("Adafruit GPS library basic parsing test!");
-
   delay(1000);
-
-
 }
 
 void callback(char* topic, byte* message, unsigned int length) {
@@ -177,6 +132,8 @@ void loop()
   Wire.write(kjoremodus);              // sends one byte
   Wire.endTransmission();    // stop transmitting
 
+  //sender informasjon til zumo bilen med variablen "kjoremodus"
+  //man kan bruke lignende funksjonalitet for å sende data fra zumobilen til esp32.
   delay(500);
 
   if (!client.connected()) {
@@ -265,7 +222,4 @@ void loop()
   }
 
   }
-
-  //sender informasjon til zumo bilen med variablen "kjoremodus"
-  //man kan bruke lignende funksjonalitet for å sende data fra zumobilen til esp32.
 }
