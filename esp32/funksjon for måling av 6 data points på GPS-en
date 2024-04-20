@@ -1,0 +1,66 @@
+//antall data points
+int const numReadings = 6;
+
+//variablene til GPS-en
+int x[numReadings];
+int y[numReadings];
+int z[numReadings];
+int v[numreadings];
+
+//GPS
+const int rad = 4;
+const int kolonne = numReadings;
+int* GPS[]={x,y,z,v};
+
+int i = 0;
+
+void readSensor(){
+
+  GPS[0][i] = 1; //avleser første variabel i GPS listen
+
+  GPS[1][i] = 2; //avleser andre variabel i GPS listen
+
+  GPS[2][i] = 3; //avleser tredje variabel i GPS listen 
+
+  GPS[3][i] = 4; //avleser fjerde variabel i GPS listen
+
+  //test (printer ut verdiene til de forskjellige listene )
+  for(int i = 0; i < rad; i++){
+    for(int j = 0; j < kolonne; j++){
+      Serial.print(GPS[i][j]);
+    }
+  }
+
+  if(i == 5){
+    Serial.println("send data..."); //sender GPS-verdier med 6 data points for hver variabel
+  }
+
+  //går til neste index
+  i = i + 1;
+
+  //i settes tilbake til index 0 når den har gått gjennom hele listen
+  if(i >= kolonne){
+    i = 0;
+  }
+}
+void setup() {
+  Serial.begin(9600);
+
+  //legger til zeros i listen
+  for(int m=0; m < rad; m ++){
+    for(int n = 0;n < kolonne; n++){
+      GPS[m][n] = 0;
+    }
+  }
+  //tar en timestamp ved begynnelsen av programmet
+  previousMillis = millis();
+}
+
+void loop() {
+  unsigned long currentMillis = millis();
+  
+  if(currentMillis - previousMillis > 10000){ //avleser GPS-en hvert tiende sekund
+    previousMillis = currentMillis;
+    readSensor();
+  }
+}
