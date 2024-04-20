@@ -8,6 +8,7 @@ class Prosjekt {
     void connectWiFi(const char* ssid, const char* password);
     void sendMessages(String message, String phoneNumber, String apiKey);
     //void reconnectMQTT();
+    void wireTransmit(byte zumoaddress, byte kjoremodus);
   private: 
     int _pin;
 };

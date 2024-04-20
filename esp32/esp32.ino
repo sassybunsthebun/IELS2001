@@ -26,7 +26,6 @@ const char* mqtt_server = "10.25.17.47";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
-long lastMsg = 0;
 char msg[50];
 int value = 0;
 
@@ -37,7 +36,7 @@ float humidity = 0;
 const int ledPin = 4;
 
 /// VARIABLER FOR I2C-KOMMUNIKASJON ///
-
+byte zumoaddress = 4;
 byte kjoremodus = 0;
 
 /// VARIABLER FOR GPS-MODUL ///
@@ -54,24 +53,23 @@ Adafruit_GPS GPS(&GPSSerial);
 // Set to 'true' if you want to debug and listen to the raw GPS sentences
 #define GPSECHO false
 
+/// VARIABLER FOR DELY MED MILLIS ///
+
 uint32_t timer = millis();
+const int interval = 5000;
 
 void setup()
 {
   Serial.begin(115200);
-
   prosjekt.connectWiFi(ssid, password); //kobler opp til Wi-Fi
   prosjekt.sendMessages(message, phoneNumber, apiKey); // sender melding (denne funksjonen brukes da senere i programmet hvor man skal varsle brukeren) 
-  client.setServer(mqtt_server, 1883);
+  client.setServer(mqtt_server, 1883); 
   client.setCallback(callback);
-
-  pinMode(ledPin, OUTPUT);
+  pinMode(ledPin, OUTPUT); // for eksempelet i callback-funksjonen
   Wire.begin(); // join i2c bus (address optional for master) //
-
   //while (!Serial);  // uncomment to have the sketch wait until Serial is ready
-
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
-  Serial.println("Adafruit GPS library basic parsing test!");
+  Serial.println("Setup complete!");
   delay(1000);
 }
 
@@ -86,11 +84,10 @@ void callback(char* topic, byte* message, unsigned int length) {
     messageTemp += (char)message[i];
   }
   Serial.println();
-
   // Feel free to add more if statements to control more GPIOs with MQTT
-
   // If a message is received on the topic esp32/output, you check if the message is either "on" or "off". 
   // Changes the output state according to the message
+  // I denne call-back funksjonen kan en lage et system for å endre koden på nettsida 
   if (String(topic) == "esp32/output") {
     Serial.print("Changing output to ");
     if(messageTemp == "on"){
@@ -123,36 +120,24 @@ void reconnect() {
   }
 }
 
-
-
 void loop()
 {
-  Wire.beginTransmission(4); // transmit to device #4
-  Wire.write("kjøremodus");        // sends five bytes
-  Wire.write(kjoremodus);              // sends one byte
-  Wire.endTransmission();    // stop transmitting
 
-  //sender informasjon til zumo bilen med variablen "kjoremodus"
-  //man kan bruke lignende funksjonalitet for å sende data fra zumobilen til esp32.
-  delay(500);
-
-  if (!client.connected()) {
-    reconnect();
+  char c = GPS.read(); //Leser GPS-data
+  if (GPSECHO)
+    if (c) Serial.print(c);
+  if (GPS.newNMEAreceived()) {
+    Serial.print(GPS.lastNMEA()); 
+    if (!GPS.parse(GPS.lastNMEA())) 
+      return; 
   }
-  client.loop();
 
-  long now = millis();
-  if (now - lastMsg > 5000) {
-    lastMsg = now;
-
-    temperature = random(1,10);
-    humidity = random(1,99);
+  if (millis() - timer > interval) { //sender sensorverdier hvert femte sekund
+    timer = millis(); // reset the timer
     
-    // Temperature in Celsius
-    //temperature = bme.readTemperature();   
-    // Uncomment the next line to set temperature in Fahrenheit 
-    // (and comment the previous temperature line)
-    //temperature = 1.8 * bme.readTemperature() + 32; // Temperature in Fahrenheit
+    prosjekt.wireTransmit(zumoaddress, kjoremodus); //sender informasjon til zumo bilen med variablen "kjoremodus" (man kan bruke lignende funksjonalitet for å sende data fra zumobilen til esp32.)
+    temperature = random(1,10); // sett inn for andre sensorverdier 
+    humidity = random(1,99);
     
     // Convert the value to a char array
     char tempString[8];
@@ -160,8 +145,6 @@ void loop()
     Serial.print("Temperature: ");
     Serial.println(tempString);
     client.publish("esp32/output", tempString);
-
-    //humidity = bme.readHumidity();
     
     // Convert the value to a char array
     char humString[8];
@@ -170,25 +153,6 @@ void loop()
     Serial.println(humString);
     client.publish("esp32/output", humString);
 
-    // read data from the GPS in the 'main loop'
-  char c = GPS.read();
-  // if you want to debug, this is a good time to do it!
-  if (GPSECHO)
-    if (c) Serial.print(c);
-  // if a sentence is received, we can check the checksum, parse it...
-  if (GPS.newNMEAreceived()) {
-    // a tricky thing here is if we print the NMEA sentence, or data
-    // we end up not listening and catching other sentences!
-    // so be very wary if using OUTPUT_ALLDATA and trying to print out data
-    Serial.print(GPS.lastNMEA()); // this also sets the newNMEAreceived() flag to false
-    if (!GPS.parse(GPS.lastNMEA())) // this also sets the newNMEAreceived() flag to false
-      return; // we can fail to parse a sentence in which case we should just wait for another
-  }
-  
-
-  // approximately every 2 seconds or so, print out the current stats
-  if (millis() - timer > 5000) {
-    timer = millis(); // reset the timer
     Serial.print("\nTime: ");
     if (GPS.hour < 10) { Serial.print('0'); }
     Serial.print(GPS.hour, DEC); Serial.print(':');
@@ -221,5 +185,8 @@ void loop()
     }
   }
 
+  if (!client.connected()) {
+    reconnect();
   }
+  client.loop();
 }
