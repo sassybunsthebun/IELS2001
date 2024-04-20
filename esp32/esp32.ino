@@ -68,7 +68,7 @@ void setup()
   pinMode(ledPin, OUTPUT); // for eksempelet i callback-funksjonen
   Wire.begin(); // join i2c bus (address optional for master) //
   //while (!Serial);  // uncomment to have the sketch wait until Serial is ready
-  Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
+  Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2);
   Serial.println("Setup complete!");
   delay(1000);
 }
