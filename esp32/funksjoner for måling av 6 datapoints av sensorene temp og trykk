@@ -1,0 +1,62 @@
+//antall data points
+const int numReadings = 6;
+
+//temperatur
+int temperatur[numReadings];
+
+//trykk
+int trykk[numReadings];
+
+//index variabel
+int i = 0;
+
+int total = 0;
+
+unsigned long previousMillis = millis();
+
+void readSensor(){
+  temperatur[i] = 1; //analogRead(...)
+  trykk[i] = 2; //analogRead(...)
+
+  //test
+  total = total + temperatur[i];
+
+  //printer ut verdien til index "i" i listene 
+  Serial.print(temperatur[i]);
+  Serial.print(trykk[i]);
+
+  //test
+  if(i == 5){ //her skal den sende de 6 dataverdiene til neste esp32
+    Serial.println("send data");
+    Serial.println(total);
+  }
+
+  //går til neste index
+  i = i + 1;
+
+  //i settes tilbake til index 0 når den har gått gjennom hele listen
+  if(i > numReadings){
+    i = 0;
+  }
+}
+void setup() {
+  Serial.begin(9600);
+  
+  //lagger til zeros i listene
+  for(int i = 0; i < numReadings; i++){
+    temperatur[i] = 0;
+    trykk[i] = 0;
+  }
+  //tar en timestamp ved begynnelsen av programmet
+  previousMillis = millis();
+}
+
+
+void loop() {
+  unsigned long currentMillis = millis();
+
+  if(currentMillis - previousMillis >= 10000){ //leser av sensorverdier hvert tiende sekund 
+    previousMillis = currentMillis;
+    readSensor();
+  }
+}
