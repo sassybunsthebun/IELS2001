@@ -8,7 +8,7 @@
 #include <HardwareSerial.h>
 
 
-void Prosjekt::connectWiFi(const char* ssid, const char* password) {
+void connectWiFi(const char* ssid, const char* password) {
   WiFi.begin(ssid, password);
   Serial.begin(115200);
   Serial.println("Connecting");
@@ -21,7 +21,7 @@ void Prosjekt::connectWiFi(const char* ssid, const char* password) {
   Serial.println(WiFi.localIP());
 }
 
-void Prosjekt::sendMessages(String message, String phoneNumber, String apiKey) {
+void sendMessages(String& message, String& phoneNumber, String& apiKey) {
   // Data to send with HTTP POST
   String url = "https://api.callmebot.com/whatsapp.php?phone=" + phoneNumber + "&apikey=" + apiKey + "&text=" + urlEncode(message);    
   HTTPClient http;
@@ -42,7 +42,7 @@ void Prosjekt::sendMessages(String message, String phoneNumber, String apiKey) {
   }
 }
 
-/*void Prosjekt::reconnectMQTT() {
+void reconnectMQTT(PubSubClient& client) {
     while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
@@ -58,10 +58,10 @@ void Prosjekt::sendMessages(String message, String phoneNumber, String apiKey) {
       delay(5000);
     }
   }
-}*/ 
+}
 
 
-void Prosjekt::wireTransmit(byte zumoaddress, byte kjoremodus) {
+void wireTransmit(byte zumoaddress, byte kjoremodus) {
     Wire.beginTransmission(zumoaddress); // transmit to device #4
     Wire.write("kjøremodus");        // sends five bytes
     Wire.write(kjoremodus);              // sends one byte

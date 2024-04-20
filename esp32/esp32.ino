@@ -6,7 +6,6 @@
 #include <Adafruit_GPS.h>
 #include <HardwareSerial.h>
 #include "Prosjekt.h" //vårt bibliotek for å rydde i koden :) nice 
-Prosjekt prosjekt;
 
 /// VARIABLER FOR WIFI_TILKOBLING ///
 
@@ -25,7 +24,7 @@ String message = "HEI:)"; //denne kan endres til en mer utfyllende melding sener
 const char* mqtt_server = "10.25.17.47";
 
 WiFiClient espClient;
-PubSubClient client(espClient);
+PubSubClient client = PubSubClient(espClient);
 char msg[50];
 int value = 0;
 
@@ -61,8 +60,8 @@ const int interval = 5000;
 void setup()
 {
   Serial.begin(115200);
-  prosjekt.connectWiFi(ssid, password); //kobler opp til Wi-Fi
-  prosjekt.sendMessages(message, phoneNumber, apiKey); // sender melding (denne funksjonen brukes da senere i programmet hvor man skal varsle brukeren) 
+  connectWiFi(ssid, password); //kobler opp til Wi-Fi
+  sendMessages(message, phoneNumber, apiKey); // sender melding (denne funksjonen brukes da senere i programmet hvor man skal varsle brukeren) 
   client.setServer(mqtt_server, 1883); 
   client.setCallback(callback);
   pinMode(ledPin, OUTPUT); // for eksempelet i callback-funksjonen
@@ -101,28 +100,8 @@ void callback(char* topic, byte* message, unsigned int length) {
   }
 }
 
-void reconnect() {
-  // Loop until we're reconnected
-  while (!client.connected()) {
-    Serial.print("Attempting MQTT connection...");
-    // Attempt to connect
-    if (client.connect("ESP8266Client")) {
-      Serial.println("connected");
-      // Subscribe
-      client.subscribe("esp32/output");
-    } else {
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
-      // Wait 5 seconds before retrying
-      delay(5000);
-    }
-  }
-}
-
 void loop()
 {
-
   char c = GPS.read(); //Leser GPS-data
   if (GPSECHO)
     if (c) Serial.print(c);
@@ -135,7 +114,7 @@ void loop()
   if (millis() - timer > interval) { //sender sensorverdier hvert femte sekund
     timer = millis(); // reset the timer
     
-    prosjekt.wireTransmit(zumoaddress, kjoremodus); //sender informasjon til zumo bilen med variablen "kjoremodus" (man kan bruke lignende funksjonalitet for å sende data fra zumobilen til esp32.)
+    wireTransmit(zumoaddress, kjoremodus); //sender informasjon til zumo bilen med variablen "kjoremodus" (man kan bruke lignende funksjonalitet for å sende data fra zumobilen til esp32.)
     temperature = random(1,10); // sett inn for andre sensorverdier 
     humidity = random(1,99);
     
@@ -186,7 +165,7 @@ void loop()
   }
 
   if (!client.connected()) {
-    reconnect();
+    reconnectMQTT(client);
   }
   client.loop();
 }
