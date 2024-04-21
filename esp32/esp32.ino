@@ -13,8 +13,6 @@ const char* ssid = "Garfield party";
 const char* password = "Lasagnalover6969";
 
 /// VARIABLER FOR  MELDING GJENNOM WHATSAPP 
-// +international_country_code + phone number
-// Portugal +351, example: +351912345678
 String phoneNumber = "+4748230543";
 String apiKey = "4833002";
 String message = "HEI:)"; //denne kan endres til en mer utfyllende melding senere
@@ -28,6 +26,7 @@ PubSubClient client = PubSubClient(espClient);
 char msg[50];
 int value = 0;
 
+/// VARIABLER FOR SENSORAVLESNING ///
 float temperature = 0;
 float humidity = 0;
 
@@ -61,7 +60,7 @@ void setup()
 {
   Serial.begin(115200);
   connectWiFi(ssid, password); //kobler opp til Wi-Fi
-  sendMessages(message, phoneNumber, apiKey); // sender melding (denne funksjonen brukes da senere i programmet hvor man skal varsle brukeren) 
+  sendWhatsAppMessage(message, phoneNumber, apiKey); // sender melding (denne funksjonen brukes da senere i programmet hvor man skal varsle brukeren) 
   client.setServer(mqtt_server, 1883); 
   client.setCallback(callback);
   pinMode(ledPin, OUTPUT); // for eksempelet i callback-funksjonen

@@ -7,10 +7,14 @@
 #include <Adafruit_GPS.h>
 #include <HardwareSerial.h>
 
-
-void connectWiFi(const char* ssid, const char* password) {
+/*
+* Connects to WPA2 secured WiFi network 
+* Note: Blocks until WiFi has successfully connected
+* @param const char* ssid: SSID of network to connect to 
+* @param const char* password: Password of network to connect to 
+*/
+void connectWiFi(const char* ssid, const char* password) { // connect and wait for wifi
   WiFi.begin(ssid, password);
-  Serial.begin(115200);
   Serial.println("Connecting");
   while(WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -21,15 +25,19 @@ void connectWiFi(const char* ssid, const char* password) {
   Serial.println(WiFi.localIP());
 }
 
-void sendMessages(String& message, String& phoneNumber, String& apiKey) {
+/* 
+* Sends WhatsAppMessage via CallMeBot
+* @param String& message: the message being sent
+* @param String& phoneNumber: phone number of the receiver (with country code)
+* @param String apiKey: API key from CallMeBot
+*/
+void sendWhatsAppMessage(String& message, String& phoneNumber, String& apiKey) {
   // Data to send with HTTP POST
   String url = "https://api.callmebot.com/whatsapp.php?phone=" + phoneNumber + "&apikey=" + apiKey + "&text=" + urlEncode(message);    
   HTTPClient http;
   http.begin(url);
-
-  // Specify content-type header
+  //CallMeBot expects an URL-encoded form
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-  
   // Send HTTP POST request
   int httpResponseCode = http.POST(url);
   if (httpResponseCode == 200){
@@ -42,6 +50,15 @@ void sendMessages(String& message, String& phoneNumber, String& apiKey) {
   }
 }
 
+//void sendWarningMessage(String& message, String& phoneNumber, String& apiKey){
+//  sendWhatsAppMessage("Warning! You have reached 80%!", phoneNumber, apiKey);
+//}
+
+/*
+* A function for reconnecting to MQTT if MQTT connection fails
+* Note: Blocks until MQTT has successfully connected
+* @param PubSubClient& client: client for PubSubClient class
+*/
 void reconnectMQTT(PubSubClient& client) {
     while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
@@ -60,10 +77,15 @@ void reconnectMQTT(PubSubClient& client) {
   }
 }
 
-
+/*
+* Transmits the variable kjoremodus to Zumo32u4 via I2C communication using the wire-library.
+* Note: This function must have a period of about 500 ms between each time it is called.
+* @param byte zumoaddress: Adress of the Zumo32u4
+* @param byte kjøremodus: Variable which stores the driving direction
+*/
 void wireTransmit(byte zumoaddress, byte kjoremodus) {
-    Wire.beginTransmission(zumoaddress); // transmit to device #4
-    Wire.write("kjøremodus");        // sends five bytes
-    Wire.write(kjoremodus);              // sends one byte
-    Wire.endTransmission();    // stop transmitting
+    Wire.beginTransmission(zumoaddress);
+    Wire.write("kjøremodus");
+    Wire.write(kjoremodus);
+    Wire.endTransmission();
 }
