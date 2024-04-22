@@ -147,6 +147,7 @@ void loop()
     Serial.print("Humidity: ");
     Serial.println(humString);
     client.publish("esp32/output", humString);
+    
     Serial.print("Fix: "); Serial.print((int)GPS.fix);
     Serial.print(" quality: "); Serial.println((int)GPS.fixquality);
     if (GPS.fix) {
