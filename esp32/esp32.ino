@@ -7,7 +7,7 @@
 #include <HardwareSerial.h>
 #include "Prosjekt.h" //vårt bibliotek for å rydde i koden :) nice 
 
-/// VARIABLER FOR WIFI_TILKOBLING ///
+/// VARIABLES FOR WIFI-CONNECTION ///
 
 const char* ssid = "Garfield party";
 const char* password = "Lasagnalover6969";
@@ -18,7 +18,7 @@ String apiKey = "4833002";
 String message = "HEI:)"; //denne kan endres til en mer utfyllende melding senere
 /// VARIABLER FOR MQTT ///
 
-// Legg til IP-adressen til MQTT broker
+/// VARIABLES FOR MQTT COMMUNICATION ///
 const char* mqtt_server = "10.25.17.47";
 
 WiFiClient espClient;
@@ -61,7 +61,7 @@ Adafruit_GPS GPS(&GPSSerial);
 // Set to 'true' if you want to debug and listen to the raw GPS sentences
 #define GPSECHO false
 
-/// VARIABLER FOR DELY MED MILLIS ///
+/// VARIABLES FOR DELAY WITH MILLIS ///
 
 uint32_t timer = millis();
 const int interval = 5000;
@@ -80,34 +80,6 @@ void setup()
   Serial.println("Setup complete!");
   delay(1000);
   previousMillis = millis();
-}
-
-void callback(char* topic, byte* message, unsigned int length) {
-  Serial.print("Message arrived on topic: ");
-  Serial.print(topic);
-  Serial.print(". Message: ");
-  String messageTemp;
-  
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)message[i]);
-    messageTemp += (char)message[i];
-  }
-  Serial.println();
-  // Feel free to add more if statements to control more GPIOs with MQTT
-  // If a message is received on the topic esp32/output, you check if the message is either "on" or "off". 
-  // Changes the output state according to the message
-  // I denne call-back funksjonen kan en lage et system for å endre koden på nettsida 
-  if (String(topic) == "esp32/output") {
-    Serial.print("Changing output to ");
-    if(messageTemp == "on"){
-      Serial.println("on");
-      digitalWrite(ledPin, HIGH);
-    }
-    else if(messageTemp == "off"){
-      Serial.println("off");
-      digitalWrite(ledPin, LOW);
-    }
-  }
 }
 
 void loop()
@@ -187,3 +159,30 @@ void readSensorAverage(){
   totalPressure = 0;
 }
 
+void callback(char* topic, byte* message, unsigned int length) {
+  Serial.print("Message arrived on topic: ");
+  Serial.print(topic);
+  Serial.print(". Message: ");
+  String messageTemp;
+  
+  for (int i = 0; i < length; i++) {
+    Serial.print((char)message[i]);
+    messageTemp += (char)message[i];
+  }
+  Serial.println();
+  // Feel free to add more if statements to control more GPIOs with MQTT
+  // If a message is received on the topic esp32/output, you check if the message is either "on" or "off". 
+  // Changes the output state according to the message
+  // I denne call-back funksjonen kan en lage et system for å endre koden på nettsida 
+  if (String(topic) == "esp32/output") {
+    Serial.print("Changing output to ");
+    if(messageTemp == "on"){
+      Serial.println("on");
+      digitalWrite(ledPin, HIGH);
+    }
+    else if(messageTemp == "off"){
+      Serial.println("off");
+      digitalWrite(ledPin, LOW);
+    }
+  }
+}
