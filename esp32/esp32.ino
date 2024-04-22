@@ -26,6 +26,8 @@ PubSubClient client = PubSubClient(espClient);
 char msg[50];
 int value = 0;
 
+//modri
+
 /// VARIABLER FOR SENSORAVLESNING ///
 
 const int numReadings = 6; // amount of datapoints
