@@ -27,7 +27,15 @@ char msg[50];
 int value = 0;
 
 /// VARIABLER FOR SENSORAVLESNING ///
-float temperature = 0;
+
+const int numReadings = 6; // amount of datapoints
+int temperature[numReadings]; //creates array for temperature readings
+int pressure[numReadings]; //creates arrray for pressure readings
+unsigned long previousMillis = 0;
+int totalTemp;
+int totalPressure;
+
+float temperature2 = 2;
 float humidity = 0;
 
 // LED Pin
@@ -69,6 +77,7 @@ void setup()
   Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2);
   Serial.println("Setup complete!");
   delay(1000);
+  previousMillis = millis();
 }
 
 void callback(char* topic, byte* message, unsigned int length) {
@@ -101,6 +110,13 @@ void callback(char* topic, byte* message, unsigned int length) {
 
 void loop()
 {
+
+  unsigned long currentMillis = millis();
+  if(currentMillis - previousMillis >= 5000){ //reads average sensor value every 5 seconds
+    previousMillis = currentMillis;
+    readSensorAverage();
+  }
+
   char c = GPS.read(); //Leser GPS-data
   if (GPSECHO)
     if (c) Serial.print(c);
@@ -114,12 +130,11 @@ void loop()
     timer = millis(); // reset the timer
     
     wireTransmit(zumoaddress, kjoremodus); //sender informasjon til zumo bilen med variablen "kjoremodus" (man kan bruke lignende funksjonalitet for å sende data fra zumobilen til esp32.)
-    temperature = random(1,10); // sett inn for andre sensorverdier 
     humidity = random(1,99);
     
     // Convert the value to a char array
     char tempString[8];
-    dtostrf(temperature, 1, 2, tempString);
+    dtostrf(temperature2, 1, 2, tempString);
     Serial.print("Temperature: ");
     Serial.println(tempString);
     client.publish("esp32/output", tempString);
@@ -130,24 +145,6 @@ void loop()
     Serial.print("Humidity: ");
     Serial.println(humString);
     client.publish("esp32/output", humString);
-
-    Serial.print("\nTime: ");
-    if (GPS.hour < 10) { Serial.print('0'); }
-    Serial.print(GPS.hour, DEC); Serial.print(':');
-    if (GPS.minute < 10) { Serial.print('0'); }
-    Serial.print(GPS.minute, DEC); Serial.print(':');
-    if (GPS.seconds < 10) { Serial.print('0'); }
-    Serial.print(GPS.seconds, DEC); Serial.print('.');
-    if (GPS.milliseconds < 10) {
-      Serial.print("00");
-    } else if (GPS.milliseconds > 9 && GPS.milliseconds < 100) {
-      Serial.print("0");
-    }
-    Serial.println(GPS.milliseconds);
-    Serial.print("Date: ");
-    Serial.print(GPS.day, DEC); Serial.print('/');
-    Serial.print(GPS.month, DEC); Serial.print("/20");
-    Serial.println(GPS.year, DEC);
     Serial.print("Fix: "); Serial.print((int)GPS.fix);
     Serial.print(" quality: "); Serial.println((int)GPS.fixquality);
     if (GPS.fix) {
@@ -168,3 +165,22 @@ void loop()
   }
   client.loop();
 }
+
+
+//A function that calculates the average value for the pressure and temperature sensors.
+void readSensorAverage(){
+
+  for (int i = 0; i < numReadings; i++) {
+    temperature[i] = 1; //analogRead(...)
+    pressure[i] = 2; //analogRead(...)
+    totalTemp += temperature[i];
+    totalPressure += pressure[i];
+  }
+  int averageTemp = totalTemp/numReadings;
+  int averagePressure = totalPressure/numReadings;
+  Serial.println(averageTemp); //insert function for sending information to esp32
+  Serial.println(averagePressure); //insert function for sending information to esp32
+  totalTemp = 0; //resets total value of temp and pressure function 
+  totalPressure = 0;
+}
+
