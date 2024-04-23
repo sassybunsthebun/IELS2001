@@ -30,10 +30,10 @@ int value = 0;
 
 /// VARIABLER FOR SENSORAVLESNING ///
 
+const int pressurePin = 33; //connnect the pressure sensor to pin 33
 const int numReadings = 6; // amount of datapoints
 int temperature[numReadings]; //creates array for temperature readings
 int pressure[numReadings]; //creates arrray for pressure readings
-unsigned long previousMillis = 0;
 int totalTemp;
 int totalPressure;
 
@@ -63,7 +63,7 @@ Adafruit_GPS GPS(&GPSSerial);
 
 /// VARIABLES FOR DELAY WITH MILLIS ///
 
-uint32_t timer = millis();
+unsigned long previousMillis = 0;
 const int interval = 5000;
 
 void setup()
@@ -84,9 +84,9 @@ void setup()
 
 void loop()
 {
-/*
+
   unsigned long currentMillis = millis();
-  if(currentMillis - previousMillis >= 5000){ //reads average sensor value every 5 seconds
+  if(currentMillis - previousMillis >= interval){ //reads average sensor value every 5 seconds
     previousMillis = currentMillis;
     readSensorAverage();
   }
@@ -100,25 +100,8 @@ void loop()
       return; 
   }
 
-  if (millis() - timer > interval) { //sender sensorverdier hvert femte sekund
-    timer = millis(); // reset the timer
-    
-    wireTransmit(zumoaddress, kjoremodus); //sender informasjon til zumo bilen med variablen "kjoremodus" (man kan bruke lignende funksjonalitet for å sende data fra zumobilen til esp32.)
-    humidity = random(1,99);
-    
-    // Convert the value to a char array
-    char tempString[8];
-    dtostrf(temperature2, 1, 2, tempString);
-    Serial.print("Temperature: ");
-    Serial.println(tempString);
-    client.publish("esp32/output", tempString);
-    
-    // Convert the value to a char array
-    char humString[8];
-    dtostrf(humidity, 1, 2, humString);
-    Serial.print("Humidity: ");
-    Serial.println(humString);
-    client.publish("esp32/output", humString);
+  if (millis() - previousMillis > interval) { //sender sensorverdier hvert femte sekund
+    previousMillis = millis(); // reset the timer
     
     Serial.print("Fix: "); Serial.print((int)GPS.fix);
     Serial.print(" quality: "); Serial.println((int)GPS.fixquality);
@@ -134,7 +117,7 @@ void loop()
       Serial.print("Antenna status: "); Serial.println((int)GPS.antenna);
     }
   }
-*/
+
   if (!client.connected()) {
     reconnectMQTT(client);
   }
@@ -145,16 +128,19 @@ void loop()
 void readSensorAverage(){
 
   for (int i = 0; i < numReadings; i++) {
-    temperature[i] = 1; //analogRead(...)
-    pressure[i] = 2; //analogRead(...)
+    temperature[i] = 1; //
+    pressure[i] = analogRead(pressurepin);
     totalTemp += temperature[i];
     totalPressure += pressure[i];
   }
   int averageTemp = totalTemp/numReadings;
   int averagePressure = totalPressure/numReadings;
+  char pressureString[8];
+  averagePressure.toCharArray(pressureString, 8);
+  client.publish("esp32/output", pressureString);
   Serial.println(averageTemp); //insert function for sending information to esp32
   Serial.println(averagePressure); //insert function for sending information to esp32
-  totalTemp = 0; //resets total value of temp and pressure function 
+  totalTemp = 0; //resets total value of temperature and pressure  
   totalPressure = 0;
 }
 
