@@ -9,11 +9,11 @@
 
 /// VARIABLES FOR WIFI-CONNECTION ///
 
-const char* ssid = "NTNU-IOT";
-const char* password = "";
+const char* ssid = "Garfield party";
+const char* password = "Lasagnalover6969";
 
 /// VARIABLES FOR MQTT COMMUNICATION ///
-const char* mqtt_server = "10.25.17.47";
+const char* mqtt_server = "192.168.0.144";
 
 WiFiClient espClient;
 PubSubClient client = PubSubClient(espClient);
@@ -23,7 +23,7 @@ int value = 0;
 /// VARIABLES FOR DELAY WITH MILLIS ///
 
 uint32_t timer = millis();
-const int interval = 5000;
+const int interval = 1000;
 
 /// VARIABLES FOR JOYSTICK ///
 
@@ -35,11 +35,11 @@ int UpDownMidPoint = 0;
 String direction; 
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   LeftRightMidPoint = analogRead(LeftRightPin); 
   UpDownMidPoint = analogRead(UpDownPin); 
-  Serial.begin(115200);
   connectWiFi(ssid, password); //kobler opp til Wi-Fi
+  client.setServer(mqtt_server, 1883); 
   client.setCallback(callback);
 }
 
@@ -49,14 +49,17 @@ void loop() {
   if (UpDown < UpDownMidPoint - MidPointBuffer){
     direction = "backwards"; 
   }
-  if (UpDown > UpDownMidPoint + MidPointBuffer){
+  else if (UpDown > UpDownMidPoint + MidPointBuffer){
     direction = "forwards";
   }
-  if (LeftRight < LeftRightMidPoint - MidPointBuffer){
+  else if (LeftRight < LeftRightMidPoint - MidPointBuffer){
     direction = "left";
   }
-  if (LeftRight > LeftRightMidPoint + MidPointBuffer){
+  else if (LeftRight > LeftRightMidPoint + MidPointBuffer){
     direction = "right";
+  }
+  else {
+    direction = "";
   }
 
   Serial.println(direction); 
@@ -73,6 +76,8 @@ void loop() {
     reconnectMQTT(client);
   }
   client.loop();
+
+  delay(100);
 }
 
 void callback(char* topic, byte* message, unsigned int length) {
