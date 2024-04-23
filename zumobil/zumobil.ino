@@ -25,22 +25,37 @@ void setup()
   for (byte i = 0; i <= 254; i++){
     lineSensors.calibrate();
   }
+  motors.setSpeeds(0,0);
 }
 
 void loop()
 {
-  linjefolging();
+  
+  //linjefolging();
 }
 
 // function that executes whenever data is received from master
 // this function is registered as an event, see setup()
 void receiveEvent(int howMany)
 {
-    unsigned long currentMillis = millis();
-  if(currentMillis - previousMillis >= 100){ //reads average sensor value every 5 seconds
-    previousMillis = currentMillis;
-      int kjoremodus = Wire.read();   
-    Serial.println(kjoremodus);   
+    //unsigned long currentMillis = millis();
+  //if(currentMillis - previousMillis >= 100){ //reads average sensor value every 5 seconds
+    //previousMillis = currentMillis;
+    int kjoremodus = Wire.read();   
+    Serial.println(kjoremodus);
+    if(kjoremodus == 1){
+      motors.setSpeeds(50,150);
+    }
+    else if(kjoremodus == 2){
+      motors.setSpeeds(150,50);
+    }
+    else if(kjoremodus == 3){
+      motors.setSpeeds(150,150);
+    }
+    else if(kjoremodus == 4){
+      motors.setSpeeds(-100,-100);
+    //}
+    delay(100);
   }
   
   //Inne i denne funksjonen kan man sette opp logikk for hvordan bilen skal bevege seg basert på verdien til kjoremodus.

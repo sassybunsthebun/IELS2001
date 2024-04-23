@@ -85,7 +85,7 @@ void reconnectMQTT(PubSubClient& client) {
 */
 void wireTransmit(byte zumoaddress, byte kjoremodus) {
     Wire.beginTransmission(zumoaddress);
-    Wire.write("kjøremodus");
     Wire.write(kjoremodus);
+    Serial.print("message sent!");
     Wire.endTransmission();
 }

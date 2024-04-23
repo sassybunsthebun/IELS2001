@@ -19,7 +19,7 @@ String message = "HEI:)"; //denne kan endres til en mer utfyllende melding sener
 /// VARIABLER FOR MQTT ///
 
 /// VARIABLES FOR MQTT COMMUNICATION ///
-const char* mqtt_server = "10.25.17.47";
+const char* mqtt_server = "192.168.0.144";
 
 WiFiClient espClient;
 PubSubClient client = PubSubClient(espClient);
@@ -73,18 +73,18 @@ void setup()
   sendWhatsAppMessage(message, phoneNumber, apiKey); // sender melding (denne funksjonen brukes da senere i programmet hvor man skal varsle brukeren) 
   client.setServer(mqtt_server, 1883); 
   client.setCallback(callback);
-  pinMode(ledPin, OUTPUT); // for eksempelet i callback-funksjonen
+  //pinMode(ledPin, OUTPUT); // for eksempelet i callback-funksjonen
   Wire.begin(); // join i2c bus (address optional for master) //
   //while (!Serial);  // uncomment to have the sketch wait until Serial is ready
-  Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2);
-  Serial.println("Setup complete!");
+ // Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2);
+  //Serial.println("Setup complete!");
   delay(1000);
   previousMillis = millis();
 }
 
 void loop()
 {
-
+/*
   unsigned long currentMillis = millis();
   if(currentMillis - previousMillis >= 5000){ //reads average sensor value every 5 seconds
     previousMillis = currentMillis;
@@ -134,13 +134,12 @@ void loop()
       Serial.print("Antenna status: "); Serial.println((int)GPS.antenna);
     }
   }
-
+*/
   if (!client.connected()) {
     reconnectMQTT(client);
   }
   client.loop();
 }
-
 
 //A function that calculates the average value for the pressure and temperature sensors.
 void readSensorAverage(){
@@ -176,13 +175,21 @@ void callback(char* topic, byte* message, unsigned int length) {
   // I denne call-back funksjonen kan en lage et system for å endre koden på nettsida 
   if (String(topic) == "esp32/output") {
     Serial.print("Changing output to ");
-    if(messageTemp == "on"){
-      Serial.println("on");
-      digitalWrite(ledPin, HIGH);
+    if(messageTemp == "left"){
+      kjoremodus = 1; 
+      wireTransmit(zumoaddress, kjoremodus);
     }
-    else if(messageTemp == "off"){
-      Serial.println("off");
-      digitalWrite(ledPin, LOW);
+    else if(messageTemp == "right"){
+      kjoremodus = 2; 
+      wireTransmit(zumoaddress, kjoremodus);
+    }
+    else if(messageTemp == "forwards"){
+      kjoremodus = 3; 
+      wireTransmit(zumoaddress, kjoremodus);
+    }
+    else if(messageTemp == "backwards"){
+      kjoremodus = 4; 
+      wireTransmit(zumoaddress, kjoremodus);
     }
   }
 }
