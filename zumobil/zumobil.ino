@@ -15,6 +15,11 @@ unsigned long previousMillis = 0;
 #define NUM_SENSORS 5 // amount of sensors
 unsigned int lineSensorValues[NUM_SENSORS]; //creates an array lineSensorValues with a length of NUM_SENSORS
 
+/// VARIABLES FOR I2C COMMUNICATION ///
+
+byte espaddress = 8; 
+byte info = 0; 
+
 void setup()
 {
   Wire.begin(4);                // join i2c bus with address #4

@@ -6,8 +6,8 @@
 * @param byte zumoaddress: Adress of the Zumo32u4
 * @param byte kjøremodus: Variable which stores the driving direction
 */
-void wireTransmit(byte zumoaddress, byte kjoremodus) {
-    Wire.beginTransmission(zumoaddress);
-    Wire.write(kjoremodus);
+void wireTransmit(byte espaddress, byte info) {
+    Wire.beginTransmission(espaddress);
+    Wire.write(info);
     Wire.endTransmission();
 }
