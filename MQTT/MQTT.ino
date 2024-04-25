@@ -1,10 +1,12 @@
 #include <PubSubClient.h>
 #include <WiFi.h>
 #include <RTClib.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
 
 // WiFi
-const char* ssid = "Telia-2G-7C1911";                
-const char* wifiPassword = "BPUt5DKnn9bY";
+const char* ssid = "NTNU-IOT";                
+const char* wifiPassword = "";
 
 // MQTT
 const char* mqttServer = "192.168.0.84"; 
@@ -14,10 +16,19 @@ const char* mqttUsername = "mashii"; // MQTT username
 const char* mqttPassword = "EtVanskeligPassord69"; // MQTT password
 const char* clientID = "mashii"; // MQTT client ID
 
+// Data wire is plugged into digital pin 2 on the Arduino
+#define ONE_WIRE_BUS 32
+int sensor = 32;
 const uint8_t pressurePin = 33;
 
 int pressurePoints[10] = {};
 int smoothValue;
+
+// Setup a oneWire instance to communicate with any OneWire device
+OneWire oneWire(ONE_WIRE_BUS);	
+
+// Pass oneWire reference to DallasTemperature library
+DallasTemperature sensors(&oneWire);
 
 uint8_t j = 0;
 int dataMilli = millis();
@@ -32,6 +43,9 @@ PubSubClient client(mqttServer, 1883, wifiClient);
 
 void setup()
 {
+  pinMode(sensor,INPUT);
+  sensors.begin();	// Start up the library
+  
   pinMode(pressurePin,INPUT);
   Serial.begin(115200);
   rtc.begin();
@@ -57,6 +71,7 @@ void setup()
 
 void loop()
 {
+  temperaturSensor();
   DateTime now = rtc.now();
   //Serial.println(analogRead(pressurePin));
 
@@ -110,4 +125,15 @@ void connect_MQTT(){
   else {
     Serial.println("Connection to MQTT Broker failed…");
   } 
+}
+
+void temperaturSensor(){
+  // put your main code here, to run repeatedly:
+  sensors.requestTemperatures(); 
+
+  //print the temperature in Celsius
+  Serial.print("Temperature: ");
+  Serial.print(sensors.getTempCByIndex(0));
+  Serial.print((char)176);//shows degrees character
+  Serial.println("C  |  ");
 }
