@@ -13,7 +13,7 @@ const char* ssid = "NTNU-IOT";
 const char* password = "";
 
 /// VARIABLES FOR MQTT COMMUNICATION ///
-const char* mqtt_server = "10.25.17.47";
+const char* mqtt_server = "10.25.17.47"; //IP-address of Raspberry Pi
 
 WiFiClient espClient;
 PubSubClient client = PubSubClient(espClient);
@@ -23,13 +23,13 @@ int value = 0;
 /// VARIABLES FOR DELAY WITH MILLIS ///
 
 uint32_t timer = millis();
-const int interval = 200;
+const int interval = 500;
 
 /// VARIABLES FOR JOYSTICK ///
 
 const int LeftRightPin = 35; // L/R readings are read on pin 3
 const int UpDownPin = 32; // U/D readings are read on pin 4
-int MidPointBuffer = 200; 
+int MidPointBuffer = 200; // buffer for defining the midpoint on the joystick 
 int LeftRightMidPoint = 0; 
 int UpDownMidPoint = 0; 
 String direction; 
@@ -41,15 +41,14 @@ int buttonState;
 int lastButtonState = 0; 
 unsigned long lastDebounceTime = 0; 
 unsigned long debounceDelay = 50; 
-int modus = 0; 
+int mode = 0; //changes which mode the controller is in. 1 = joystick, 0 = none
 
 void setup() {
   Serial.begin(115200);
   LeftRightMidPoint = analogRead(LeftRightPin); 
   UpDownMidPoint = analogRead(UpDownPin); 
-  connectWiFi(ssid, password); //kobler opp til Wi-Fi
+  connectWiFi(ssid, password);
   client.setServer(mqtt_server, 1883); 
-// client.setCallback(callback);
   pinMode(buttonPin, INPUT);
 }
 
@@ -64,15 +63,15 @@ void loop() {
     if (reading != buttonState) {
       buttonState = reading; 
       if (buttonState == 1) {
-        modus = !modus;
-        Serial.println(modus); 
+        mode = !mode;
+        Serial.println(mode); 
       }
     }
   }
 
   lastButtonState = reading;
 
-  if (modus == 1){
+  if (mode == 1){
     joyStickMode(); 
   }
   
@@ -83,7 +82,6 @@ void loop() {
 }
 
 void joyStickMode() {
-
   if (millis() - timer > interval) {
     timer = millis(); 
   int LeftRight = analogRead(LeftRightPin);
@@ -103,35 +101,9 @@ void joyStickMode() {
   else {
     direction = "";
   }
-  
-    Serial.println(direction); 
-
-    char directionString[10];
-    direction.toCharArray(directionString, 10);
-    Serial.println(directionString);
-    client.publish("esp32/output", directionString);
-  }
-
-}
-/*void callback(char* topic, byte* message, unsigned int length) {
-  Serial.print("Message arrived on topic: ");
-  Serial.print(topic);
-  Serial.print(". Message: ");
-  String messageTemp;
-  
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)message[i]);
-    messageTemp += (char)message[i];
-  }
-  Serial.println();
-  // Feel free to add more if statements to control more GPIOs with MQTT
-  // If a message is received on the topic esp32/output, you check if the message is either "on" or "off". 
-  // Changes the output state according to the message
-  // I denne call-back funksjonen kan en lage et system for å endre koden på nettsida 
-  if (String(topic) == "esp32/output") {
-    Serial.print("Changing output to ");
-    if(messageTemp == "on"){
-    }
+  char directionString[10];
+  direction.toCharArray(directionString, 10);
+  client.publish("esp32/output", directionString); //converts the direction to a char array and publishes it to "esp32/output"
+  Serial.println(direction); 
   }
 }
-*/
