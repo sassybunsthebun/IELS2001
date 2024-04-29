@@ -9,11 +9,11 @@
 
 /// VARIABLES FOR WIFI-CONNECTION ///
 
-const char* ssid = "Garfield party";
-const char* password = "Lasagnalover6969";
+const char* ssid = "NTNU-IOT";
+const char* password = "";
 
 /// VARIABLES FOR MQTT COMMUNICATION ///
-const char* mqtt_server = "192.168.0.144";
+const char* mqtt_server = "10.25.17.47";
 
 WiFiClient espClient;
 PubSubClient client = PubSubClient(espClient);
@@ -23,16 +23,25 @@ int value = 0;
 /// VARIABLES FOR DELAY WITH MILLIS ///
 
 uint32_t timer = millis();
-const int interval = 1000;
+const int interval = 200;
 
 /// VARIABLES FOR JOYSTICK ///
 
 const int LeftRightPin = 35; // L/R readings are read on pin 3
 const int UpDownPin = 32; // U/D readings are read on pin 4
-int MidPointBuffer = 300; 
+int MidPointBuffer = 200; 
 int LeftRightMidPoint = 0; 
 int UpDownMidPoint = 0; 
 String direction; 
+
+/// VARIABLES FOR PUSHBUTTON ///
+
+const int buttonPin = 25; 
+int buttonState; 
+int lastButtonState = 0; 
+unsigned long lastDebounceTime = 0; 
+unsigned long debounceDelay = 50; 
+int modus = 0; 
 
 void setup() {
   Serial.begin(115200);
@@ -40,10 +49,43 @@ void setup() {
   UpDownMidPoint = analogRead(UpDownPin); 
   connectWiFi(ssid, password); //kobler opp til Wi-Fi
   client.setServer(mqtt_server, 1883); 
-  client.setCallback(callback);
+// client.setCallback(callback);
+  pinMode(buttonPin, INPUT);
 }
 
 void loop() {
+  int reading = digitalRead(buttonPin); 
+
+  if (reading != lastButtonState) {
+    lastDebounceTime = millis(); 
+  }
+
+  if ((millis() - lastDebounceTime) > debounceDelay) {
+    if (reading != buttonState) {
+      buttonState = reading; 
+      if (buttonState == 1) {
+        modus = !modus;
+        Serial.println(modus); 
+      }
+    }
+  }
+
+  lastButtonState = reading;
+
+  if (modus == 1){
+    joyStickMode(); 
+  }
+  
+  if (!client.connected()) {
+    reconnectMQTT(client);
+  }
+  client.loop();
+}
+
+void joyStickMode() {
+
+  if (millis() - timer > interval) {
+    timer = millis(); 
   int LeftRight = analogRead(LeftRightPin);
   int UpDown = analogRead(UpDownPin); 
   if (UpDown < UpDownMidPoint - MidPointBuffer){
@@ -61,26 +103,17 @@ void loop() {
   else {
     direction = "";
   }
+  
+    Serial.println(direction); 
 
-  Serial.println(direction); 
-  if (millis() - timer > interval) { //sender sensorverdier hvert femte sekund
-    timer = millis(); // reset the timer
-    // Convert the value to a char array
     char directionString[10];
     direction.toCharArray(directionString, 10);
     Serial.println(directionString);
     client.publish("esp32/output", directionString);
   }
 
-  if (!client.connected()) {
-    reconnectMQTT(client);
-  }
-  client.loop();
-
-  delay(100);
 }
-
-void callback(char* topic, byte* message, unsigned int length) {
+/*void callback(char* topic, byte* message, unsigned int length) {
   Serial.print("Message arrived on topic: ");
   Serial.print(topic);
   Serial.print(". Message: ");
@@ -101,3 +134,4 @@ void callback(char* topic, byte* message, unsigned int length) {
     }
   }
 }
+*/
