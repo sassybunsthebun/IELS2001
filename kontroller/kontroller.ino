@@ -53,7 +53,7 @@ void setup() {
 }
 
 void loop() {
-  int reading = digitalRead(buttonPin); 
+ int reading = digitalRead(buttonPin); 
 
   if (reading != lastButtonState) {
     lastDebounceTime = millis(); 
@@ -74,7 +74,7 @@ void loop() {
   if (mode == 1){
     joyStickMode(); 
   }
-  
+
   if (!client.connected()) {
     reconnectMQTT(client);
   }

@@ -9,8 +9,8 @@
 
 /// VARIABLES FOR WIFI-CONNECTION ///
 
-const char* ssid = "Garfield party";
-const char* password = "Lasagnalover6969";
+const char* ssid = "NTNU-IOT";
+const char* password = "";
 
 /// VARIABLER FOR  MELDING GJENNOM WHATSAPP 
 String phoneNumber = "+4748230543";
@@ -19,7 +19,7 @@ String message = "HEI:)"; //denne kan endres til en mer utfyllende melding sener
 /// VARIABLER FOR MQTT ///
 
 /// VARIABLES FOR MQTT COMMUNICATION ///
-const char* mqtt_server = "192.168.0.144";
+const char* mqtt_server = "10.25.17.47";
 
 WiFiClient espClient;
 PubSubClient client = PubSubClient(espClient);
@@ -85,9 +85,9 @@ void setup()
 void loop()
 {
 
-  unsigned long currentMillis = millis();
-  if(currentMillis - previousMillis >= interval){ //reads average sensor value every 5 seconds
-    previousMillis = currentMillis;
+/*
+  if(millis() - previousMillis >= interval){ //reads average sensor value every 5 seconds
+    previousMillis = millis();
     readSensorAverage();
   }
 
@@ -100,7 +100,7 @@ void loop()
       return; 
   }
 
-  if (millis() - previousMillis > interval) { //sender sensorverdier hvert femte sekund
+  if (millis() - previousMillis >= interval) { //sender sensorverdier hvert femte sekund
     previousMillis = millis(); // reset the timer
     
     Serial.print("Fix: "); Serial.print((int)GPS.fix);
@@ -117,19 +117,19 @@ void loop()
       Serial.print("Antenna status: "); Serial.println((int)GPS.antenna);
     }
   }
-
+  */
   if (!client.connected()) {
     reconnectMQTT(client);
   }
   client.loop();
 }
-
+/*
 //A function that calculates the average value for the pressure and temperature sensors.
 void readSensorAverage(){
 
   for (int i = 0; i < numReadings; i++) {
     temperature[i] = 1; //
-    pressure[i] = analogRead(pressurepin);
+    pressure[i] = analogRead(pressurePin);
     totalTemp += temperature[i];
     totalPressure += pressure[i];
   }
@@ -143,7 +143,7 @@ void readSensorAverage(){
   totalTemp = 0; //resets total value of temperature and pressure  
   totalPressure = 0;
 }
-
+*/
 void callback(char* topic, byte* message, unsigned int length) {
   Serial.print("Message arrived on topic: ");
   Serial.print(topic);
@@ -160,22 +160,23 @@ void callback(char* topic, byte* message, unsigned int length) {
   // Changes the output state according to the message
   // I denne call-back funksjonen kan en lage et system for å endre koden på nettsida 
   if (String(topic) == "esp32/output") {
-    Serial.print("Changing output to ");
     if(messageTemp == "left"){
       kjoremodus = 1; 
-      wireTransmit(zumoaddress, kjoremodus);
     }
     else if(messageTemp == "right"){
       kjoremodus = 2; 
-      wireTransmit(zumoaddress, kjoremodus);
     }
     else if(messageTemp == "forwards"){
       kjoremodus = 3; 
-      wireTransmit(zumoaddress, kjoremodus);
     }
     else if(messageTemp == "backwards"){
       kjoremodus = 4; 
-      wireTransmit(zumoaddress, kjoremodus);
     }
+  } 
+
+  if(millis() - previousMillis >= interval){
+    previousMillis = millis();
+    wireTransmit(zumoaddress, kjoremodus); 
   }
+
 }

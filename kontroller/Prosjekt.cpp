@@ -62,11 +62,13 @@ void sendWhatsAppMessage(String& message, String& phoneNumber, String& apiKey) {
 void reconnectMQTT(PubSubClient& client) {
     while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
+    String clientId = "ESP8266Client-";
+    clientId += String(random(0xffff), HEX);
     // Attempt to connect
-    if (client.connect("ESP8266Client")) {
+    if (client.connect(clientId.c_str())) {
       Serial.println("connected");
       // Subscribe
-      client.subscribe("esp32/output");
+      //client.subscribe("esp32/output");
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
