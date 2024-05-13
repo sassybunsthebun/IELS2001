@@ -18,7 +18,6 @@ void receiveEvent(int howMany){
   while(Wire.available()){
     for(int i =0; i < howMany; i++){
       krappSving[i] = Wire.read();
-      Serial.println(krappSving[i]);
     }
   }
 }
