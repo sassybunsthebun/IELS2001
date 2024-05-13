@@ -1,6 +1,6 @@
 #include <Wire.h>
 
-//give device adress between 0 and 127 (apperently 0-7 are occupied)  gir enheten en adresse 
+//gir enheten en adresse 
 int espAddress = 4;
 
 //antall datapoints
