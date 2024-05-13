@@ -1,3 +1,4 @@
+//slave esp32
 #include <Wire.h>
 
 //gir enheten en adresse 
