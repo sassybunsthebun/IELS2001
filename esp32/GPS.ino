@@ -145,7 +145,7 @@ void loop(){
       return; // we can fail to parse a sentence in which case we should just wait for another
   }
 
-  //----------beregner fart og akselerasjon--------
+  //----------finner fart og beregner akselerasjon--------
   if(millis() - previousMillis >= 1000){
     previousMillis = millis();
 
