@@ -18,10 +18,8 @@ int i = 0;
 
 //krapp sving mot vestre
 int left = 0;
-
 //ok
 int null = 1;
-
 //krapp sving mot høyre
 int right = 2;
 
@@ -57,7 +55,7 @@ void sendCommand(){
 //beregner antall ticks på hver hjul 
 void calculateEncoder() {
   //finner antall ticks
-  countsLeft[i] = encoders.getCountsAndResetLeft(); //gets counts so the value is saved untill we come back again, reset just tells it to count from zero again
+  countsLeft[i] = encoders.getCountsAndResetLeft(); 
   countsRight[i] = encoders.getCountsAndResetRight();
 
   //konverterer negative ticks fra vestre hjul til positiv verdi
@@ -72,22 +70,14 @@ void calculateEncoder() {
 }
 
 //funksjon som sammenligner antall ticks på høyre og venstre hjul og lagrer resultatet i listen krappsving
-void compareLeftAndRightEncoder(){
-  //test
-  Serial.print("count left: ");
-  Serial.println(countsLeft[i]);
-
-  Serial.print("count right: ");
-  Serial.println(countsRight[i]);
-  
-  
-  //dersom vesntre count er høyere enn høyre count, så printes "krapp sving mot høyre"
+void compareLeftAndRightEncoder(){  
+  //dersom vesntre count er høyere enn høyre count
   if(countsLeft[i] - countsRight[i] >= 300){ // verdien "300" kan endres
     krappSving[i] = right;
     Serial.println("krapp sving mot høyre!");
   }
 
-  //dersom høre count er høyere enn venstre count, så printes "krapp sving mot venstre"
+  //dersom høyre count er høyere enn venstre count
   else if(countsRight[i] - countsLeft[i] >= 300){ // verdien "300" kan endres
     krappSving[i] = left;
     Serial.println("krapp sving mot venstre!");
@@ -97,11 +87,6 @@ void compareLeftAndRightEncoder(){
   else{
     krappSving[i] = null;
     Serial.println("ok!");
-  }
-
-  //test 
-  for(int i = 0; i < numReadings; i++){
-    Serial.println(krappSving[i]);
   }
 
   //when the array have 6 new data points, send to esp32
@@ -117,7 +102,7 @@ void compareLeftAndRightEncoder(){
 }
 
 void setup() {
-  //initialize i2c communication as master
+  //initialize I2C communication as master
   Wire.begin(); 
 
   Serial.begin(9600);
@@ -126,7 +111,7 @@ void setup() {
 }
 
 void loop() {
-  //sjekker og lagrer info hver 5. sekund
+  //sjekker og lagrer info hver 5. sekund (dette kan endres)
   if(millis()-previousMillis >= 5000){ //verdien "5000" kan endres
     previousMillis = millis();
     calculateEncoder();
