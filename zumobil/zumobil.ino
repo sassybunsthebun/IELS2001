@@ -2,13 +2,13 @@
 #include <Zumo32U4Encoders.h>
 #include <Zumo32U4.h>
 
-/// DEFINE THE INSTANCES OF THE CLASSES IN THE ZUMO32u4 LIBRARY ///
+/// DEFINE THE INSTANCES OF THE CLASSES IN THE ZUMO32U4 LIBRARY ///
 Zumo32U4LineSensors lineSensors;
 Zumo32U4Motors motors;
 Zumo32U4OLED display;
 Zumo32U4Encoders encoder;
 
-/// VARIABLER FOR LINE FOLLOWING ///
+/// VARIABLES FOR LINE FOLLOWING ///
 int speed = 220; 
 unsigned long previousMillis = 0; 
 
@@ -22,7 +22,7 @@ byte info = 0;
 
 void setup()
 {
-  Wire.begin(4);                // join i2c bus with address #4
+  Wire.begin(4);// join i2c bus with address #4
   Wire.onReceive(receiveEvent); 
   Serial.begin(9600);
   lineSensors.initFiveSensors(); //merges the line sensors 
@@ -35,7 +35,7 @@ void setup()
 
 void loop()
 {
-  
+ delay(500); 
   //linjefolging();
 }
 
@@ -46,7 +46,7 @@ void receiveEvent(int howMany)
     //unsigned long currentMillis = millis();
   //if(currentMillis - previousMillis >= 100){ //reads average sensor value every 5 seconds
     //previousMillis = currentMillis;
-    int kjoremodus = Wire.read();   
+    /*int kjoremodus = Wire.read();   
     Serial.println(kjoremodus);
     if(kjoremodus == 1){
       motors.setSpeeds(50,150);
@@ -60,8 +60,14 @@ void receiveEvent(int howMany)
     else if(kjoremodus == 4){
       motors.setSpeeds(-100,-100);
     //}
-    delay(100);
+    */
+  while(Wire.available()) {
+    char c = Wire.read(); // receive byte as a character
+    Serial.print(c);         // print the character
   }
+  int x = Wire.read();    // receive byte as an integer
+  Serial.println(x);         
+ // }
   
   //Inne i denne funksjonen kan man sette opp logikk for hvordan bilen skal bevege seg basert på verdien til kjoremodus.
 }
@@ -78,7 +84,7 @@ void linjefolging(){
     maxSpeed -= offset/2;
     unsigned int leftMotor = maxSpeed + offset - previousOffset/4;
     unsigned int rightMotor = maxSpeed - offset + previousOffset/4;
-    motors.setSpeeds( leftMotor, rightMotor);
+    motors.setSpeeds(leftMotor, rightMotor);
   }
   else if (sensorValue <= 1980) { 
     offset = (2000 - sensorValue)/5;

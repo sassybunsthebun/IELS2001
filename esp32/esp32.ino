@@ -64,7 +64,7 @@ Adafruit_GPS GPS(&GPSSerial);
 /// VARIABLES FOR DELAY WITH MILLIS ///
 
 unsigned long previousMillis = 0;
-const int interval = 5000;
+const int interval = 500;
 
 void setup()
 {
@@ -123,7 +123,7 @@ void loop()
   }
   client.loop();
 }
-/*
+
 //A function that calculates the average value for the pressure and temperature sensors.
 void readSensorAverage(){
 
@@ -143,7 +143,7 @@ void readSensorAverage(){
   totalTemp = 0; //resets total value of temperature and pressure  
   totalPressure = 0;
 }
-*/
+
 void callback(char* topic, byte* message, unsigned int length) {
   Serial.print("Message arrived on topic: ");
   Serial.print(topic);
@@ -176,7 +176,11 @@ void callback(char* topic, byte* message, unsigned int length) {
 
   if(millis() - previousMillis >= interval){
     previousMillis = millis();
-    wireTransmit(zumoaddress, kjoremodus); 
+    //wireTransmit(zumoaddress, kjoremodus); 
+    Wire.beginTransmission(zumoaddress);
+    Wire.write(kjoremodus);
+    Wire.endTransmission();
+    Serial.print("message sent!");
   }
 
 }
