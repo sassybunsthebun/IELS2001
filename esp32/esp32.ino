@@ -30,12 +30,21 @@ int value = 0;
 
 /// VARIABLER FOR SENSORAVLESNING ///
 
+const int tempPin = 32; // connect the temperature sensor to pin 32
 const int pressurePin = 33; //connnect the pressure sensor to pin 33
 const int numReadings = 6; // amount of datapoints
 int temperature[numReadings]; //creates array for temperature readings
-int pressure[numReadings]; //creates arrray for pressure readings
+int pressure[numReadings]; //creates array for pressure readings
+float latitude[numReadings];
+float longitude[numReadings]; 
+int altitude[numReadings];
+int speed[numReadings];
 int totalTemp;
 int totalPressure;
+float totalLatitude;
+float totalLongitude; 
+float totalAltitude; 
+float totalSpeed; 
 
 float temperature2 = 2;
 float humidity = 0;
@@ -84,60 +93,58 @@ void setup()
 
 void loop()
 {
-
-/*
   if(millis() - previousMillis >= interval){ //reads average sensor value every 5 seconds
     previousMillis = millis();
     readSensorAverage();
-  }
-
-  char c = GPS.read(); //Leser GPS-data
-  if (GPSECHO)
-    if (c) Serial.print(c);
-  if (GPS.newNMEAreceived()) {
-    Serial.print(GPS.lastNMEA()); 
-    if (!GPS.parse(GPS.lastNMEA())) 
-      return; 
-  }
-
-  if (millis() - previousMillis >= interval) { //sender sensorverdier hvert femte sekund
-    previousMillis = millis(); // reset the timer
-    
-    Serial.print("Fix: "); Serial.print((int)GPS.fix);
-    Serial.print(" quality: "); Serial.println((int)GPS.fixquality);
     if (GPS.fix) {
-      Serial.print("Location: ");
-      Serial.print(GPS.latitude, 4); Serial.print(GPS.lat);
-      Serial.print(", ");
-      Serial.print(GPS.longitude, 4); Serial.println(GPS.lon);
-      Serial.print("Speed (knots): "); Serial.println(GPS.speed);
-      Serial.print("Angle: "); Serial.println(GPS.angle);
-      Serial.print("Altitude: "); Serial.println(GPS.altitude);
-      Serial.print("Satellites: "); Serial.println((int)GPS.satellites);
-      Serial.print("Antenna status: "); Serial.println((int)GPS.antenna);
+      readGPSAverage();
     }
   }
-  */
+  
   if (!client.connected()) {
     reconnectMQTT(client);
   }
   client.loop();
 }
 
+void readGPSAverage(){
+
+  for (int i = 0; i < numReadings; i++) {
+    latitude[i] = GPS.latitude; 
+    longitude[i] = GPS.longitude;
+    altitude[i] = GPS.altitude; 
+    speed[i] = GPS.speed * 514.444444; //converts from knots of speed to mm/s
+    totalLatitude += latitude[i]; 
+    totalLongitude += longitude[i];
+    totalAltitude += altitude[i]; 
+    totalSpeed += speed[i];
+  }
+  float averageLatitude = totalLatitude/numReadings; 
+  float averageLongitude = totalLongitude/numReadings; 
+  int averageAltitude = totalAltitude/numReadings; 
+  int averageSpeed = totalSpeed/numReadings; 
+  //char pressureString[8];
+  //averagePressure.toCharArray(pressureString, 8);
+  //client.publish("esp32/output", pressureString);
+  totalLongitude = 0;
+  totalAltitude = 0; 
+  totalSpeed = 0;
+}
+
 //A function that calculates the average value for the pressure and temperature sensors.
 void readSensorAverage(){
 
   for (int i = 0; i < numReadings; i++) {
-    temperature[i] = 1; //
+    temperature[i] = analogRead(tempPin); 
     pressure[i] = analogRead(pressurePin);
     totalTemp += temperature[i];
-    totalPressure += pressure[i];
+    totalPressure += pressure[i]; 
   }
   int averageTemp = totalTemp/numReadings;
   int averagePressure = totalPressure/numReadings;
-  char pressureString[8];
-  averagePressure.toCharArray(pressureString, 8);
-  client.publish("esp32/output", pressureString);
+  //char pressureString[8];
+  //averagePressure.toCharArray(pressureString, 8);
+  //client.publish("esp32/output", pressureString);
   Serial.println(averageTemp); //insert function for sending information to esp32
   Serial.println(averagePressure); //insert function for sending information to esp32
   totalTemp = 0; //resets total value of temperature and pressure  
@@ -174,13 +181,11 @@ void callback(char* topic, byte* message, unsigned int length) {
     }
   } 
 
-  if(millis() - previousMillis >= interval){
-    previousMillis = millis();
+  Serial.print(kjoremodus);
     //wireTransmit(zumoaddress, kjoremodus); 
-    Wire.beginTransmission(zumoaddress);
-    Wire.write(kjoremodus);
-    Wire.endTransmission();
-    Serial.print("message sent!");
-  }
+  Wire.beginTransmission(zumoaddress);
+  Wire.write(kjoremodus);
+  Wire.endTransmission();
+  Serial.print("message sent!");
 
 }
