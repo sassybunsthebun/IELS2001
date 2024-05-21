@@ -115,6 +115,7 @@ float powerUsage = 0;
 //acceleration count
 int storAksCount = 0;
 
+//height variables
 float meterAbove = 0.0;
 float meterBelow = 0.0;
 float previousMeter = 0.0;
