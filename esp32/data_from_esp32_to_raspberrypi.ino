@@ -38,14 +38,14 @@ int sharpTurnCount = 0;
 const uint8_t tempPin = 32;
 const uint8_t pressurePin = 33;
 
-//datalists with 4 elements
+//arrays with 4 elements
 float pressure[4];
 float temperature[4];
 float x[4];
 float y[4];
 float z[4];
 
-//datalists with 9-10 elements
+//arrays with 9-10 elements
 float aks[9];
 float velocity[10];
 
@@ -73,7 +73,6 @@ uint8_t j = 0;
 //acceleration intervall
 float milliSeconds = 1500.0;
 
-//time to send data 10 seconds
 //time to check 4 element lists
 unsigned long longCheck = 3750;
 unsigned long previousLongCheck = millis();
@@ -108,6 +107,7 @@ Adafruit_GPS GPS(&GPSSerial);
 // Set GPSECHO to 'false' to turn off echoing the GPS data to the Serial console
 #define GPSECHO false
 
+//-----other variables----
 //power usage calculation
 float basisPower = 17;
 float powerUsage = 0;
@@ -155,6 +155,7 @@ void readTemperature(){
 //4096
 void readPressure(){
   float value = analogRead(pressurePin);
+  //maps value to 0 - 1 ton
   pressure[i] = map(value, 0, 4095, 0, 1000);
   Serial.print("pressure: ");
   Serial.println(pressure[i]);
@@ -276,9 +277,10 @@ void loop(){
   }
   //15 seconds have passed send message
   if(j == 10){
+    //test
     for(int i = 0; i < 10; i++){
       Serial.print("vel: ");
-      Serial.println(velocity[i]); //sjekk her!!!!
+      Serial.println(velocity[i]); 
     }
 
     for(int i = 0; i < 4; i++){
@@ -303,13 +305,14 @@ void loop(){
         aks[n]/2;
       }
       aksSmoothValue += aks[n];
+      
       if(sharpTurn[n] == 3 or sharpTurn[n] == 1){
         sharpTurnCount += 1;
       }
       if(aks[n] >= 4){
         storAksCount += 1;
       }
-      if(aks[n] <= -2){ //m/s 
+      if(aks[n] <= -2){ //m/s (remember to convert 4 and 2 to cm/s)
         storAksCount += 10;
       }
     }
