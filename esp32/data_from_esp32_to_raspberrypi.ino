@@ -333,7 +333,7 @@ void loop(){
     }
     else if(zSmoothValue - previousMeter >= 0){
       meterAbove = zSmoothValue - previousMeter;
-      previousMeter = zSmoothValue; //check if this i correct
+      previousMeter = zSmoothValue; 
     }
 
     //power usage calculation (her trengs forbedringer)
