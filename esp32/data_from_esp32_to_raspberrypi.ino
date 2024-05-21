@@ -452,8 +452,6 @@ void sendMQTT(){
     Serial.setTimeout(2000);
       
     // MQTT can only transmit strings
-    const char* messageTopic = "message";
-
     if (client.publish(messageTopic, message.c_str())) {
       client.publish(messageTopic, message.c_str());
       Serial.println("sendt!");
