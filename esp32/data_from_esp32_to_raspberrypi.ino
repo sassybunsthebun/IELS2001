@@ -71,7 +71,7 @@ uint8_t i = 0;
 uint8_t j = 0;
 
 //acceleration intervall
-float milliSeconds = 1000.0;
+float milliSeconds = 1500.0;
 
 //time to send data 10 seconds
 //time to check 4 element lists
