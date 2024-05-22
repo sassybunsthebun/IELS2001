@@ -105,6 +105,8 @@ float acceleration;
 void setup()
 {
   Serial.begin(115200);
+  Wire.begin(espaddress);
+  Wire.onReceive(receiveEvent); 
 
   connectWiFi(ssid, password); //kobler opp til Wi-Fi
 
@@ -112,12 +114,7 @@ void setup()
 
   client.setServer(mqtt_server, 1883); 
   client.setCallback(callback);
-  //pinMode(ledPin, OUTPUT); // for eksempelet i callback-funksjonen
-  Wire.begin(espaddress); // join i2c bus (address optional for master) //
-  //while (!Serial);  // uncomment to have the sketch wait until Serial is ready
- // Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2);
-  //Serial.println("Setup complete!");
-  Wire.onReceive(receiveEvent); 
+
   delay(1000);
   previousMillis = millis();
 }
@@ -238,9 +235,8 @@ void callback(char* topic, byte* message, unsigned int length) {
 //This function counts the amount of sharp turns made by the zumo car
 void receiveEvent(int howMany){
   while(Wire.available()){
-    for(int i =0; i < howMany; i++){
-      sharpTurnCount += Wire.read();
-      Serial.println(sharpTurnCount);
+    sharpTurnCount += Wire.read();
+    Serial.println(sharpTurnCount);
     }
   }
 }

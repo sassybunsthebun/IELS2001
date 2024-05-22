@@ -6,7 +6,7 @@
 Zumo32U4LineSensors lineSensors;
 Zumo32U4Motors motors;
 Zumo32U4OLED display;
-Zumo32U4Encoders encoder;
+Zumo32U4Encoders encoders;
 
 /// VARIABLES FOR LINE FOLLOWING ///
 int speed = 220; 
@@ -15,16 +15,28 @@ unsigned long previousMillis = 0;
 #define NUM_SENSORS 5 // amount of sensors
 unsigned int lineSensorValues[NUM_SENSORS]; //creates an array lineSensorValues with a length of NUM_SENSORS
 
-/// VARIABLES FOR I2C COMMUNICATION ///
+/// VARIABLES FOR DETECTING A SHARP TURN ///
 
-byte espaddress = 8; 
-byte info = 0; 
+const int numReadings = 6;
+
+int countsLeft[numReadings];
+int countsRight[numReadings];
+int sharpTurn[numReadings];
+int totalTurns; 
+
+int interval = 5000; 
+int buffer = 500; 
+
+///I2C VARIABLES ///
+
+int espaddress = 8;
+int zumoaddress = 4; 
 
 void setup()
 {
-  Wire.begin(4);// join i2c bus with address #4
+  Wire.begin(zumoaddress);
   Wire.onReceive(receiveEvent); 
-  Serial.begin(9600);
+  Serial.begin(115200);
   lineSensors.initFiveSensors(); //merges the line sensors 
   motors.setSpeeds(-100,100); 
   for (byte i = 0; i <= 254; i++){
@@ -35,7 +47,11 @@ void setup()
 
 void loop()
 {
- delay(500); 
+
+  if(millis() - previousMillis >= interval){
+    previousMillis = millis(); 
+    calculateEncoders();
+  }
   //linjefolging();
 }
 
@@ -97,3 +113,36 @@ void linjefolging(){
   }
   previousOffset = offset;
 } 
+
+//This function calculates the "ticks" of each wheel to derermine if there is a sharp turn
+void calculateEncoders() {
+  for(int i =0; i < numReadings; i++){
+    countsLeft[i] = abs(encoders.getCountsAndResetLeft()); 
+    countsRight[i] = abs(encoders.getCountsAndResetRight());
+    if(countsLeft[i] - countsRight[i] >= buffer){ 
+      sharpTurn[i] = 1;
+    }
+    else if(countsRight[i] - countsLeft[i] >= buffer){
+      sharpTurn[i] = 1;
+    }
+    else{
+      sharpTurn[i] = 0;
+   }
+   totalTurns += sharpTurn[i];
+  }
+  sendCommand();
+  totalTurns = 0; 
+}
+
+//This function sends the total turn value to the ESP32. 
+void sendCommand(){
+  Wire.beginTransmission(espaddress);
+  Wire.write(totalTurns);
+  int result = Wire.endTransmission();
+  if(result == 0){
+    Serial.println("transmission sucessfull");
+  }else{
+    Serial.print("transmission failed with error code: ");
+    Serial.println(result);
+  }
+}
