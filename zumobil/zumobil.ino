@@ -32,6 +32,11 @@ int buffer = 500;
 int espaddress = 8;
 int zumoaddress = 4; 
 
+/// CONTROLLER VARIABLES ///
+
+bool joyStickMode = false; 
+int kjoremodus; 
+
 void setup()
 {
   Wire.begin(zumoaddress);
@@ -52,40 +57,33 @@ void loop()
     previousMillis = millis(); 
     calculateEncoders();
   }
-  //linjefolging();
+
+  if (joyStickMode == false) {
+    linjefolging();
+  }
+
+  if(kjoremodus == 1){
+    motors.setSpeeds(50,150);
+  }
+  else if(kjoremodus == 2){
+    motors.setSpeeds(150,50);
+  }
+  else if(kjoremodus == 3){
+    motors.setSpeeds(150,150);
+  }
+  else if(kjoremodus == 4){
+    motors.setSpeeds(-100,-100);
+  }
 }
 
 // function that executes whenever data is received from master
 // this function is registered as an event, see setup()
 void receiveEvent(int howMany)
 {
-    //unsigned long currentMillis = millis();
-  //if(currentMillis - previousMillis >= 100){ //reads average sensor value every 5 seconds
-    //previousMillis = currentMillis;
-    /*int kjoremodus = Wire.read();   
+  while(Wire.available()){
+    kjoremodus = Wire.read();
     Serial.println(kjoremodus);
-    if(kjoremodus == 1){
-      motors.setSpeeds(50,150);
-    }
-    else if(kjoremodus == 2){
-      motors.setSpeeds(150,50);
-    }
-    else if(kjoremodus == 3){
-      motors.setSpeeds(150,150);
-    }
-    else if(kjoremodus == 4){
-      motors.setSpeeds(-100,-100);
-    //}
-    */
-  while(Wire.available()) {
-    char c = Wire.read(); // receive byte as a character
-    Serial.print(c);         // print the character
   }
-  int x = Wire.read();    // receive byte as an integer
-  Serial.println(x);         
- // }
-  
-  //Inne i denne funksjonen kan man sette opp logikk for hvordan bilen skal bevege seg basert på verdien til kjoremodus.
 }
 
 //A function that follows a taped up line on the floor using the Zumo32u4's linefollower sensors
