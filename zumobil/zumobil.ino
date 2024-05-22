@@ -34,13 +34,14 @@ int zumoaddress = 4;
 
 /// CONTROLLER VARIABLES ///
 
-bool joyStickMode = false; 
+//bool joyStickMode = false; 
 int kjoremodus; 
+int controllerInterval = 100; 
 
 void setup()
 {
-  Wire.begin(zumoaddress);
-  Wire.onReceive(receiveEvent); 
+  Wire.begin(); //zumoaddress
+  //Wire.onReceive(receiveEvent); 
   Serial.begin(115200);
   lineSensors.initFiveSensors(); //merges the line sensors 
   motors.setSpeeds(-100,100); 
@@ -52,31 +53,43 @@ void setup()
 
 void loop()
 {
-
   if(millis() - previousMillis >= interval){
     previousMillis = millis(); 
+    calculateEncoders(); 
+  }
+
+  if(millis() - previousMillis >= controllerInterval){
+    previousMillis = millis(); 
     calculateEncoders();
+    Wire.requestFrom(espaddress, 1); 
   }
 
-  if (joyStickMode == false) {
-    linjefolging();
-  }
+ // if (joyStickMode == false) {
+  //  linjefolging();
+  //}
 
+  while(Wire.available()){
+    kjoremodus = Wire.read();
+    Serial.println(kjoremodus);
+  }
   if(kjoremodus == 1){
-    motors.setSpeeds(50,150);
+    motors.setSpeeds(20,250);
   }
   else if(kjoremodus == 2){
-    motors.setSpeeds(150,50);
+    motors.setSpeeds(250,20);
   }
   else if(kjoremodus == 3){
-    motors.setSpeeds(150,150);
+    motors.setSpeeds(250,250);
   }
   else if(kjoremodus == 4){
-    motors.setSpeeds(-100,-100);
+    motors.setSpeeds(-150,-150);
+  }
+  else if(kjoremodus == 5){
+    linjefolging(); 
   }
 }
 
-// function that executes whenever data is received from master
+/*// function that executes whenever data is received from master
 // this function is registered as an event, see setup()
 void receiveEvent(int howMany)
 {
@@ -85,6 +98,8 @@ void receiveEvent(int howMany)
     Serial.println(kjoremodus);
   }
 }
+
+*/
 
 //A function that follows a taped up line on the floor using the Zumo32u4's linefollower sensors
 void linjefolging(){
@@ -128,7 +143,8 @@ void calculateEncoders() {
    }
    totalTurns += sharpTurn[i];
   }
-  sendCommand();
+  //wireTransmit(espaddress, totalTurns);
+  sendCommand(); 
   totalTurns = 0; 
 }
 

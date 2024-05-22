@@ -7,6 +7,6 @@
   void connectWiFi(const char* ssid, const char* password);
   void sendWhatsAppMessage(String& message, String& phoneNumber, String& apiKey);
   void reconnectMQTT(PubSubClient& client);
-  void wireTransmit(byte zumoaddress, byte kjoremodus);
+  void wireTransmit(int espaddress, int totalTurns);
 
 #endif

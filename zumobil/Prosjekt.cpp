@@ -6,8 +6,14 @@
 * @param byte zumoaddress: Adress of the Zumo32u4
 * @param byte kjøremodus: Variable which stores the driving direction
 */
-void wireTransmit(byte espaddress, byte info) {
-    Wire.beginTransmission(espaddress);
-    Wire.write(info);
-    Wire.endTransmission();
+void wireTransmit(int espaddress, int totalTurns) {
+  Wire.beginTransmission(espaddress);
+  Wire.write(totalTurns);
+  int result = Wire.endTransmission();
+  if(result == 0){
+    Serial.println("transmission sucessfull");
+  }else{
+    Serial.print("transmission failed with error code: ");
+    Serial.println(result);
+  }
 }

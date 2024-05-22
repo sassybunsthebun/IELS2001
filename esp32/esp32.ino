@@ -11,8 +11,8 @@
 
 /// VARIABLES FOR WIFI-CONNECTION ///
 
-const char* ssid = "NTNU-IOT";
-const char* password = "";
+const char* ssid = "Garfield party";
+const char* password = "Lasagnalover6969";
 
 /// VARIABLER FOR  MELDING GJENNOM WHATSAPP 
 String phoneNumber = "+4748230543";
@@ -21,7 +21,7 @@ String message = "HEI:)"; //denne kan endres til en mer utfyllende melding sener
 /// VARIABLER FOR MQTT ///
 
 /// VARIABLES FOR MQTT COMMUNICATION ///
-const char* mqtt_server = "10.25.17.47";
+const char* mqtt_server = "192.168.0.144";
 
 WiFiClient espClient;
 PubSubClient client = PubSubClient(espClient);
@@ -83,7 +83,7 @@ float totalSpeed;
 /// VARIABLES FOR DELAY WITH MILLIS ///
 
 unsigned long previousMillis = 0;
-const int interval = 500;
+const int interval = 5000;
 
 /// VARIABLES FOR POWER USAGE CALCULATION ///
 
@@ -105,8 +105,9 @@ float acceleration;
 void setup()
 {
   Serial.begin(115200);
-  Wire.begin(espaddress);
+  Wire.begin(espaddress); //espaddress
   Wire.onReceive(receiveEvent); 
+  Wire.onRequest(requestEvent);
 
   connectWiFi(ssid, password); //kobler opp til Wi-Fi
 
@@ -116,7 +117,6 @@ void setup()
   client.setCallback(callback);
 
   delay(1000);
-  previousMillis = millis();
 }
 
 void loop()
@@ -222,14 +222,12 @@ void callback(char* topic, byte* message, unsigned int length) {
     else if(messageTemp == "backwards"){
       kjoremodus = 4; 
     }
+    else if(messageTemp == "0"){
+      kjoremodus = 5; 
+    }
   } 
-
   Serial.print(kjoremodus);
-    //wireTransmit(zumoaddress, kjoremodus); 
-  Wire.beginTransmission(zumoaddress);
-  Wire.write(kjoremodus);
-  Wire.endTransmission();
-  Serial.print("message sent!");
+  //wireTransmit(zumoaddress, kjoremodus); 
 }
 
 //This function counts the amount of sharp turns made by the zumo car
@@ -237,8 +235,11 @@ void receiveEvent(int howMany){
   while(Wire.available()){
     sharpTurnCount += Wire.read();
     Serial.println(sharpTurnCount);
-    }
   }
+}
+
+void requestEvent(){
+  Wire.write(kjoremodus); 
 }
 
 //This function sends a message with all the values via MQTT
@@ -246,6 +247,13 @@ void sendMQTTMessage(){
 
   String MQTTmessage = String(powerUsage) + " " + String(averageSpeed) + " " + String(meterIncrease) + " " + String(meterDecrease) + " " + String(averageTemp) + " " + String(averageLatitude) + " " + String(averageLongitude) + " " + String(highAccelerationCount) + " " + String(sharpTurnCount); 
   client.publish(messageTopic, MQTTmessage.c_str());
+  int result = Wire.endTransmission();
+  if(result == 0){
+    Serial.println("transmission sucessfull");
+  }else{
+    Serial.print("transmission failed with error code: ");
+    Serial.println(result);
+  }
   Serial.print(MQTTmessage);
 }
 

@@ -85,9 +85,14 @@ void reconnectMQTT(PubSubClient& client) {
 * @param byte zumoaddress: Adress of the Zumo32u4
 * @param byte kjøremodus: Variable which stores the driving direction
 */
-void wireTransmit(byte zumoaddress, byte kjoremodus) {
-    Wire.beginTransmission(zumoaddress);
-    Wire.write(kjoremodus);
-    Serial.print("message sent!");
-    Wire.endTransmission();
+void wireTransmit(int zumoaddress, int kjoremodus) {
+  Wire.beginTransmission(zumoaddress);
+  Wire.write(kjoremodus);
+  int result = Wire.endTransmission();
+  if(result == 0){
+    Serial.println("transmission sucessfull");
+  }else{
+    Serial.print("transmission failed with error code: ");
+    Serial.println(result);
+  }
 }
