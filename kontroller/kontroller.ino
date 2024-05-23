@@ -9,11 +9,11 @@
 
 /// VARIABLES FOR WIFI-CONNECTION ///
 
-const char* ssid = "Garfield party";
-const char* password = "Lasagnalover6969";
+const char* ssid = "NTNU-IOT";
+const char* password = "";
 
 /// VARIABLES FOR MQTT COMMUNICATION ///
-const char* mqtt_server = "192.168.0.144"; //IP-address of Raspberry Pi
+const char* mqtt_server = "10.25.17.47"; //IP-address of Raspberry Pi
 
 WiFiClient espClient;
 PubSubClient client = PubSubClient(espClient);

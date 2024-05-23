@@ -11,8 +11,8 @@
 
 /// VARIABLES FOR WIFI-CONNECTION ///
 
-const char* ssid = "Garfield party";
-const char* password = "Lasagnalover6969";
+const char* ssid = "NTNU-IOT";
+const char* password = "";
 
 /// VARIABLER FOR  MELDING GJENNOM WHATSAPP 
 String phoneNumber = "+4748230543";
@@ -21,7 +21,7 @@ String message = "HEI:)"; //denne kan endres til en mer utfyllende melding sener
 /// VARIABLER FOR MQTT ///
 
 /// VARIABLES FOR MQTT COMMUNICATION ///
-const char* mqtt_server = "192.168.0.144";
+const char* mqtt_server = "10.25.17.47";
 
 WiFiClient espClient;
 PubSubClient client = PubSubClient(espClient);
@@ -121,6 +121,7 @@ void setup()
 
 void loop()
 {
+  /*
   char c = GPS.read();
   if (GPSECHO)
     if (c) Serial.print(c);
@@ -142,7 +143,7 @@ void loop()
     }
     sendMQTTMessage(); 
   }
-  
+  */
   if (!client.connected()) {
     reconnectMQTT(client);
   }
@@ -226,7 +227,7 @@ void callback(char* topic, byte* message, unsigned int length) {
       kjoremodus = 5; 
     }
   } 
-  Serial.print(kjoremodus);
+  //Serial.print(kjoremodus);
   //wireTransmit(zumoaddress, kjoremodus); 
 }
 

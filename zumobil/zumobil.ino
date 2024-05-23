@@ -36,7 +36,7 @@ int zumoaddress = 4;
 
 //bool joyStickMode = false; 
 int kjoremodus; 
-int controllerInterval = 100; 
+int controllerInterval = 50; 
 
 void setup()
 {
@@ -73,13 +73,13 @@ void loop()
     Serial.println(kjoremodus);
   }
   if(kjoremodus == 1){
-    motors.setSpeeds(20,250);
+    motors.setSpeeds(50,200);
   }
   else if(kjoremodus == 2){
-    motors.setSpeeds(250,20);
+    motors.setSpeeds(200,50);
   }
   else if(kjoremodus == 3){
-    motors.setSpeeds(250,250);
+    motors.setSpeeds(200,200);
   }
   else if(kjoremodus == 4){
     motors.setSpeeds(-150,-150);
