@@ -1,34 +1,25 @@
-# IELS2001
-A respository for tracking the changes and contributions made to the IELS2001 project spring 2024. 
+# Design project for IELS2001 spring 2024
 
-## Hva betyr ordene? 
+This repository serves as an overview over the changes made to the repository as well as a guide for how the code works and how to implement the code yourself. 
 
-- add: forteller Git "jeg har endret dette"
-- commit: "låser" endringene dine med en besrkivelse
-- push: dytter endringene dine til en remote, som for eksempel GitHub, slik at kodebasen er lik for alle på prosjektet
-- pull: drar nye endringer fra en remote
+## What does the code do? 
 
-## Hvordan gjøre en commit?
+This is a code made up of three different segments. One of the three modules, "zumobil" is a code dedicated to the Zumo32u4 made by Pololu. The zumo car version used is the one with OLED screen, which can communicate to other devices via I2C. It is the master device and it requests information from the ESP32 connected to it and sends information to it. This ESP32 is also connected to three different sensors, a temperature sensor, a pressure sensor and a GPS. The averages of each of these sensor values are sent to a raspberry pi via MQTT which then displays the information on to a Node-RED website. Another mpdule "kontroller" acts as a controller with a joystick, and an ESP32 sends the direction the Zumo32u4 is to drive in, or if it is to follow a taped up line on the ground. This information is sent to the ESP32 connected to the car which sends the information to the Zumo32u4. 
 
-først bruk kommandoen "git status" for å sjekke om du er på riktig branch. før du committer må du legge til filene du vil committe ved å bruke kommandoen "git add[filnavn]".
-eksempel på kommando: git commit -m "update the README.md with link to contributing guide"
-Push dermed endringene til GitHub ved å bruke kommandoen "git push origin main". Da er alt ordnet! Andre vil da kunne se endringene ved å bruke kommandoen "git pull".
+## How do I set this up? 
 
-For mer info, les mer her: https://github.com/git-guides/git-commit
-(eksempelet er via terminalen ved bruk av Git, som må konfigureres om man ikke har gjort dette enda) 
+You will need a Raspberry pi with mosquitto or some other MQTT broker installed and running and Node-RED installed. You will need two ESP32s and a Zumo32u4 with I2C communication capability. YOU will have to set up the following Node-RED flow in this link(insert link) as well as set up the MQTT broker to subscribe on the proper topics. 
 
-## Hvor ofte skal man gjøre en commit? 
+To set up the ESP32 with the joystick, you may follow the following circuit diagram: 
 
-Så ofte som mulig. Her er det best å få oppdatert den felles kodebasen slik at ingen i prosjektet faller bak den nyeste versjonen og har utdatert kode som kan skape konklikter når man senere merger koden.
+![kontroller](https://cdn.discordapp.com/attachments/324564514119090177/1243812190889443358/kontroller_kretsdiagram.png?ex=6652d5df&is=6651845f&hm=541aec8457c48a22e2cf8c1c798c708618e641432227ab58eb42bb555b584055&)
 
-## Har du gjort noe feil?
+To set up the Zumo32u4 and ESP32 module wit the attached sensors, you may follow the following circuit diagram: 
 
-Bruk kommandoen "git revert".
+(insert)
 
-## Hvordan gjøre en versjonsendring? 
+Then you may upload the corresponding code to the corresponding devices, and you should be good to go!
 
-- små endringer: endrer på de siste nummerene, for eksempel v2.11.3 endres til v2.11.4
-- større endringer: endrer på de midterste nummerene, og setter siste nummer til 0, for eksempel v2.11.4 blir v2.12.0
-- endre versjon: endrer de første nummerene, setter resten til 0, for eksempel v2.12.0 blir til v3.00.0
+## Got into any issues? 
 
-For mer info, les her: https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository
+No worries, we've got your back. Get in contact with us and we will help you with any issues or questions and concerns you may have.
