@@ -8,13 +8,13 @@ This is a code made up of three different segments. One of the three modules, "z
 
 ## How do I set this up? 
 
-You will need a Raspberry pi with mosquitto or some other MQTT broker installed and running and Node-RED installed. You will need two ESP32s and a Zumo32u4 with I2C communication capability. YOU will have to set up the following Node-RED flow in this link(insert link) as well as set up the MQTT broker to subscribe on the proper topics. 
+You will need a Raspberry pi with mosquitto or some other MQTT broker installed and running and Node-RED installed. You will need two ESP32s and a Zumo32u4 with I2C communication capability. You will have to set up the following Node-RED flow in this link(insert link) as well as set up the MQTT broker to subscribe on the proper topics. 
 
-To set up the ESP32 with the joystick, you may follow the following circuit diagram: 
+The joystick used is the Parallax Inc 2-Axis Joystick Module. To set up the ESP32 with the joystick, you may follow the following circuit diagram: 
 
 ![kontroller](https://cdn.discordapp.com/attachments/324564514119090177/1243812190889443358/kontroller_kretsdiagram.png?ex=6652d5df&is=6651845f&hm=541aec8457c48a22e2cf8c1c798c708618e641432227ab58eb42bb555b584055&)
 
-To set up the Zumo32u4 and ESP32 module wit the attached sensors, you may follow the following circuit diagram: 
+The GPS used is the Ultimate GPS Breackout Board by Adafruit. To set up the Zumo32u4 and ESP32 module with the attached sensors, you may follow the following circuit diagram: 
 
 (insert)
 
