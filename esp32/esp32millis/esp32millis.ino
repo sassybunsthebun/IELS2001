@@ -7,18 +7,17 @@
 #include <HardwareSerial.h>
 #include <DallasTemperature.h>
 #include <OneWire.h>
-#include "Prosjekt.h" //vårt bibliotek for å rydde i koden :) nice 
+#include "Prosjekt.h"
 
 /// VARIABLES FOR WIFI-CONNECTION ///
 
 const char* ssid = "Garfield party";
 const char* password = "Lasagnalover6969";
 
-/// VARIABLER FOR  MELDING GJENNOM WHATSAPP 
+/// VARIABLER FOR MESSAGE VIA WHATSAPP 
 String phoneNumber = "+4748230543";
 String apiKey = "4833002";
-String message = "HEI:)"; //denne kan endres til en mer utfyllende melding senere
-/// VARIABLER FOR MQTT ///
+String message = "Du har nå brukt 90% av kvoten din!"; 
 
 /// VARIABLES FOR MQTT COMMUNICATION ///
 const char* mqtt_server = "192.168.0.144";
@@ -30,15 +29,9 @@ int value = 0;
 
 const char* messageTopic = "bil1";
 
-/*
-const char* mqttUsername = "mashii"
-const char* mqttPassword = EtVanskeligPassord69"
-const char* clientID = "mashii"
-*/
-
 String MQTTmessage;
 
-/// VARIABLER FOR SENSORAVLESNING ///
+/// VARIABLES FOR SENSOR READING ///
 
 #define ONE_WIRE_BUS 32
 const int tempPin = 32; // connect the temperature sensor to pin 32
@@ -54,12 +47,12 @@ int totalPressure;
 OneWire oneWire(ONE_WIRE_BUS); // Setup a oneWire instance to communicate with any OneWire device
 DallasTemperature sensors(&oneWire); // Pass oneWire reference to DallasTemperature library
 
-/// VARIABLER FOR I2C-KOMMUNIKASJON ///
+/// VARIABLES FOR I2C-COMMUNICATION ///
 byte zumoaddress = 4;
 byte espaddress = 8; 
-byte kjoremodus = 0;
+byte drivingmode;
 
-/// VARIABLER FOR GPS-MODUL ///
+/// VARIABLES FOR GPS-MODULE ///
 #define RXD2 16 //RX pin
 #define TXD2 17 //TX pin
 
@@ -90,10 +83,10 @@ const int interval = 5000;
 float basisPower = 17; 
 float powerUsage = 0; 
 
-int highAccelerationCount = 0; 
-float meterIncrease = 0.0; 
-float meterDecrease = 0.0; 
-float previousAltitude = 0.0; 
+int highAccelerationCount; 
+float meterIncrease; 
+float meterDecrease; 
+float previousAltitude; 
 bool heightCheck = false; 
 int sharpTurnCount; 
 
@@ -105,22 +98,18 @@ float acceleration;
 void setup()
 {
   Serial.begin(115200);
-  Wire.begin(espaddress); //espaddress
-  Wire.onReceive(receiveEvent); 
-  Wire.onRequest(requestEvent);
-
-  connectWiFi(ssid, password); //kobler opp til Wi-Fi
-
-  sendWhatsAppMessage(message, phoneNumber, apiKey); // sender melding (denne funksjonen brukes da senere i programmet hvor man skal varsle brukeren) 
-
-  client.setServer(mqtt_server, 1883); 
-  client.setCallback(callback);
-
-  delay(1000);
+  Wire.begin(espaddress); //sets the ESP32 address for I2C communication
+  Wire.onReceive(receiveEvent); // sets the function for when the ESP32 receives an event
+  Wire.onRequest(requestEvent); // sets the function for then the Zumo32u4 requests an event 
+  connectWiFi(ssid, password); //connects to WiFi
+  client.setServer(mqtt_server, 1883); // sets the raspberry pi as the MQTT server
+  client.setCallback(callback); // sets the callback function for MQTT communication
+  delay(1000); // a short delay before the main loop executes
 }
 
 void loop()
 {
+  
   char c = GPS.read();
   if (GPSECHO)
     if (c) Serial.print(c);
@@ -140,13 +129,48 @@ void loop()
       calculateMeterIncreaseAndDecrease();
       calculatePowerUsage();
     }
-    sendMQTTMessage(); 
+    sendMQTTMessage(); //if the GPS is not working, only the other sensors will be read and sent via MQTT. 
+    //If everything is working, everything will be sent. This is to avoid potential loss of data should the GPS lose its fix. 
   }
-  
+
   if (!client.connected()) {
-    reconnectMQTT(client);
+    reconnectMQTT(client); //reconnects if the connection is lost 
   }
   client.loop();
+}
+
+//This function takes in values received from the MQTT connection 
+void callback(char* topic, byte* message, unsigned int length) {
+  Serial.print("Message arrived on topic: ");
+  Serial.print(topic);
+  Serial.print(". Message: ");
+  String messageTemp;
+  
+  for (int i = 0; i < length; i++) {
+    Serial.print((char)message[i]);
+    messageTemp += (char)message[i];
+  }
+  Serial.println();
+  if (String(topic) == "esp32/output") {
+    if(messageTemp == "left"){
+      drivingmode = 1; 
+    }
+    else if(messageTemp == "right"){
+      drivingmode = 2; 
+    }
+    else if(messageTemp == "forwards"){
+      drivingmode = 3; 
+    }
+    else if(messageTemp == "backwards"){
+      drivingmode = 4; 
+    }
+    else if(messageTemp == "auto"){
+      drivingmode = 5; 
+    }
+  if (String(topic) == "warning") {
+    sendWhatsAppMessage(message, phoneNumber, apiKey); //sends a warning message
+  }
+  Serial.print(drivingmode);
 }
 
 //This function finds the average latitude, longitude, altitude and speed
@@ -180,8 +204,8 @@ void readSensorAverage(){
     totalTemp += temperature[i];
     totalPressure += pressure[i]; 
   }
-  Serial.println(averageTemp); //insert function for sending information to esp32
-  Serial.println(averagePressure); //insert function for sending information to esp32
+  Serial.println(averageTemp);
+  Serial.println(averagePressure);
   totalTemp = 0; //resets total value of temperature and pressure  
   totalPressure = 0;
 }
@@ -193,71 +217,18 @@ void averageAcceleration(){
  float previousVelocity = velocity; 
 }
 
-//THis function takes in values received from the MQTT connection 
-void callback(char* topic, byte* message, unsigned int length) {
-  Serial.print("Message arrived on topic: ");
-  Serial.print(topic);
-  Serial.print(". Message: ");
-  String messageTemp;
-  
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)message[i]);
-    messageTemp += (char)message[i];
-  }
-  Serial.println();
-  // Feel free to add more if statements to control more GPIOs with MQTT
-  // If a message is received on the topic esp32/output, you check if the message is either "on" or "off". 
-  // Changes the output state according to the message
-  // I denne call-back funksjonen kan en lage et system for å endre koden på nettsida 
-  if (String(topic) == "esp32/output") {
-    if(messageTemp == "left"){
-      kjoremodus = 1; 
-    }
-    else if(messageTemp == "right"){
-      kjoremodus = 2; 
-    }
-    else if(messageTemp == "forwards"){
-      kjoremodus = 3; 
-    }
-    else if(messageTemp == "backwards"){
-      kjoremodus = 4; 
-    }
-    else if(messageTemp == "0"){
-      kjoremodus = 5; 
-    }
-  } 
-  Serial.print(kjoremodus);
-  //wireTransmit(zumoaddress, kjoremodus); 
-}
-
-//This function counts the amount of sharp turns made by the zumo car
+//This function counts the amount of sharp turns made by the Zumo32u4
 void receiveEvent(int howMany){
   while(Wire.available()){
     sharpTurnCount += Wire.read();
-    Serial.println(sharpTurnCount);
   }
 }
 
 void requestEvent(){
-  Wire.write(kjoremodus); 
+  Wire.write(drivingmode); //if the Zumo32u4 requests a byte, the ESP32 will send it. 
 }
 
-//This function sends a message with all the values via MQTT
-void sendMQTTMessage(){
-
-  String MQTTmessage = String(powerUsage) + " " + String(averageSpeed) + " " + String(meterIncrease) + " " + String(meterDecrease) + " " + String(averageTemp) + " " + String(averageLatitude) + " " + String(averageLongitude) + " " + String(highAccelerationCount) + " " + String(sharpTurnCount); 
-  client.publish(messageTopic, MQTTmessage.c_str());
-  int result = Wire.endTransmission();
-  if(result == 0){
-    Serial.println("transmission sucessfull");
-  }else{
-    Serial.print("transmission failed with error code: ");
-    Serial.println(result);
-  }
-  Serial.print(MQTTmessage);
-}
-
-//This function calculates the meter increase or decrease 
+//This function calculates the altitutude increase or decrease 
 void calculateMeterIncreaseAndDecrease(){
     if(averageAltitude - previousAltitude < 0){
       meterDecrease = abs(averageAltitude - previousAltitude);
@@ -276,4 +247,19 @@ void calculatePowerUsage(){
   powerUsage += ((-2*averageTemp + 0.05*pow(averageTemp,2) + 20)/0.15);
   powerUsage += (0.2*averagePressure);
   powerUsage += ((averageSpeed * meterIncrease) / 4 - (averageSpeed * meterDecrease) / 8);
+}
+
+//This function sends a message with all the values via MQTT 
+void sendMQTTMessage(){
+
+  String MQTTmessage = String(powerUsage) + " " + String(averageSpeed) + " " + String(meterIncrease) + " " + String(meterDecrease) + " " + String(averageTemp) + " " + String(averageLatitude) + " " + String(averageLongitude) + " " + String(highAccelerationCount) + " " + String(sharpTurnCount); 
+  client.publish(messageTopic, MQTTmessage.c_str());
+  int result = Wire.endTransmission();
+  if(result == 0){
+    Serial.println("transmission sucessfull");
+  }else{
+    Serial.print("transmission failed with error code: ");
+    Serial.println(result);
+  }
+  Serial.print(MQTTmessage);
 }

@@ -68,7 +68,7 @@ void reconnectMQTT(PubSubClient& client) {
     if (client.connect(clientId.c_str())) {
       Serial.println("connected");
       // Subscribe
-      //client.subscribe("esp32/output");
+      client.subscribe("esp32/output");
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -76,5 +76,23 @@ void reconnectMQTT(PubSubClient& client) {
       // Wait 5 seconds before retrying
       delay(5000);
     }
+  }
+}
+
+/*
+* Transmits the variable kjoremodus to Zumo32u4 via I2C communication using the wire-library.
+* Note: This function must have a period of about 500 ms between each time it is called.
+* @param byte zumoaddress: Adress of the Zumo32u4
+* @param byte kjøremodus: Variable which stores the driving direction
+*/
+void wireTransmit(int zumoaddress, int kjoremodus) {
+  Wire.beginTransmission(zumoaddress);
+  Wire.write(kjoremodus);
+  int result = Wire.endTransmission();
+  if(result == 0){
+    Serial.println("transmission sucessfull");
+  }else{
+    Serial.print("transmission failed with error code: ");
+    Serial.println(result);
   }
 }

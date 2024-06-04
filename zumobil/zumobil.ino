@@ -34,7 +34,6 @@ int zumoaddress = 4;
 
 /// CONTROLLER VARIABLES ///
 
-//bool joyStickMode = false; 
 int kjoremodus; 
 int controllerInterval = 50; 
 
@@ -60,13 +59,8 @@ void loop()
 
   if(millis() - previousMillis >= controllerInterval){
     previousMillis = millis(); 
-    calculateEncoders();
     Wire.requestFrom(espaddress, 1); 
   }
-
- // if (joyStickMode == false) {
-  //  linjefolging();
-  //}
 
   while(Wire.available()){
     kjoremodus = Wire.read();
@@ -85,11 +79,11 @@ void loop()
     motors.setSpeeds(-150,-150);
   }
   else if(kjoremodus == 5){
-    linjefolging(); 
+    linjefolging();
   }
 }
 
-/*// function that executes whenever data is received from master
+// function that executes whenever data is received from master
 // this function is registered as an event, see setup()
 void receiveEvent(int howMany)
 {
@@ -98,8 +92,6 @@ void receiveEvent(int howMany)
     Serial.println(kjoremodus);
   }
 }
-
-*/
 
 //A function that follows a taped up line on the floor using the Zumo32u4's linefollower sensors
 void linjefolging(){
@@ -143,20 +135,6 @@ void calculateEncoders() {
    }
    totalTurns += sharpTurn[i];
   }
-  //wireTransmit(espaddress, totalTurns);
-  sendCommand(); 
+  wireTransmit(espaddress, totalTurns); //sends the sum of the sharp turns made by the Zumo32u4 to the ESP32.
   totalTurns = 0; 
-}
-
-//This function sends the total turn value to the ESP32. 
-void sendCommand(){
-  Wire.beginTransmission(espaddress);
-  Wire.write(totalTurns);
-  int result = Wire.endTransmission();
-  if(result == 0){
-    Serial.println("transmission sucessfull");
-  }else{
-    Serial.print("transmission failed with error code: ");
-    Serial.println(result);
-  }
 }

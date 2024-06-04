@@ -9,11 +9,11 @@
 
 /// VARIABLES FOR WIFI-CONNECTION ///
 
-const char* ssid = "NTNU-IOT";
-const char* password = "";
+const char* ssid = "Garfield party";
+const char* password = "Lasagnalover6969";
 
 /// VARIABLES FOR MQTT COMMUNICATION ///
-const char* mqtt_server = "10.25.17.47"; //IP-address of Raspberry Pi
+const char* mqtt_server = "192.168.0.144"; //IP-address for Raspberry Pi
 
 WiFiClient espClient;
 PubSubClient client = PubSubClient(espClient);
@@ -41,7 +41,7 @@ int buttonState;
 int lastButtonState = 0; 
 unsigned long lastDebounceTime = 0; 
 unsigned long debounceDelay = 50; 
-int mode = 0; //changes which mode the controller is in. 1 = joystick, 0 = none
+int mode = 0; //tracks which mode the controller is in. 1 = joystick mode, 0 = line following mode
 const int LED = 14; 
 
 void setup() {
@@ -104,8 +104,8 @@ void joyStickMode() {
   else if (LeftRight > LeftRightMidPoint + MidPointBuffer){
     direction = "right";
   }
-  else {
-    direction = "";
+  else if (mode == 0){
+    direction = "auto";
   }
   char directionString[10];
   direction.toCharArray(directionString, 10);
