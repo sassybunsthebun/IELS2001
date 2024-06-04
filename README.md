@@ -4,7 +4,7 @@ This repository serves as an overview over the changes made to the repository as
 
 ## What does the code do? 
 
-This is a code made up of three different segments. One of the three modules, "zumobil" is a code dedicated to the Zumo32u4 made by Pololu. The zumo car version used is the one with OLED screen, which can communicate to other devices via I2C. It is the master device and it requests information from the ESP32 connected to it and sends information to it. This ESP32 is also connected to three different sensors, a temperature sensor, a pressure sensor and a GPS. The averages of each of these sensor values are sent to a raspberry pi via MQTT which then displays the information on to a Node-RED website. Another mpdule "kontroller" acts as a controller with a joystick, and an ESP32 sends the direction the Zumo32u4 is to drive in, or if it is to follow a taped up line on the ground. This information is sent to the ESP32 connected to the car which sends the information to the Zumo32u4. 
+This is a code made up of three different segments. One of the three modules, "zumobil" is a code dedicated to the Zumo32u4 made by Pololu. The zumo car version used is the one with OLED screen, which can communicate to other devices via I2C. It is the master device and it requests information from the ESP32 connected to it and sends information to it. This ESP32 is also connected to three different sensors, a temperature sensor, a pressure sensor and a GPS. The averages of each of these sensor values are sent to a raspberry pi via MQTT which then displays the information on to a Node-RED website. Another module "kontroller" acts as a controller with a joystick, and an ESP32 sends the direction the Zumo32u4 is to drive in, or if it is to follow a taped up line on the ground. This information is sent to the ESP32 connected to the car which sends the information to the Zumo32u4. 
 
 The system arcitecture is described here: 
 
@@ -20,7 +20,7 @@ The joystick used is the Parallax Inc 2-Axis Joystick Module. To set up the ESP3
 
 The GPS used is the Ultimate GPS Breackout Board by Adafruit. To set up the Zumo32u4 and ESP32 module with the attached sensors, you may follow the following circuit diagram: 
 
-![esp32](https://cdn.discordapp.com/attachments/324564514119090177/1245308452893360219/image.png?ex=6658475f&is=6656f5df&hm=0923007a091007e2cf2b1b5c56d2bb4fe797630987b0a54aafb136f3e12b4fe3&)
+![esp32](https://cdn.discordapp.com/attachments/324564514119090177/1247484300325163030/image.png?ex=666031ca&is=665ee04a&hm=712fc73ffb069a67b500243ad43a57276e85131ce401b71f046b36b0295c9c4b&)
 
 Then you may upload the corresponding code to the corresponding devices, and you should be good to go!
 
