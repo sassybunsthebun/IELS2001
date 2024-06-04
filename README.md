@@ -20,7 +20,7 @@ The joystick used is the Parallax Inc 2-Axis Joystick Module. To set up the ESP3
 
 The GPS used is the Ultimate GPS Breackout Board by Adafruit. To set up the Zumo32u4 and ESP32 module with the attached sensors, you may follow the following circuit diagram: 
 
-![esp32](https://cdn.discordapp.com/attachments/324564514119090177/1245308452893360219/image.png?ex=6658475f&is=6656f5df&hm=0923007a091007e2cf2b1b5c56d2bb4fe797630987b0a54aafb136f3e12b4fe3&)
+![esp32](https://cdn.discordapp.com/attachments/324564514119090177/1247484300325163030/image.png?ex=666031ca&is=665ee04a&hm=712fc73ffb069a67b500243ad43a57276e85131ce401b71f046b36b0295c9c4b&)
 
 Then you may upload the corresponding code to the corresponding devices, and you should be good to go!
 
