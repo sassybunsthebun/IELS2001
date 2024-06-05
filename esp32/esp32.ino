@@ -17,7 +17,7 @@ const char* password = "Lasagnalover6969";
 /// VARIABLER FOR  MELDING GJENNOM WHATSAPP 
 String phoneNumber = "+4748230543";
 String apiKey = "4833002";
-String message = "HEI:)"; //denne kan endres til en mer utfyllende melding senere
+String message = "Din kvote har passert 90% for denne måneden"; //denne kan endres til en mer utfyllende melding senere
 /// VARIABLER FOR MQTT ///
 
 /// VARIABLES FOR MQTT COMMUNICATION ///
@@ -228,7 +228,12 @@ void callback(char* topic, byte* message, unsigned int length) {
   } 
   Serial.print(kjoremodus);
   //wireTransmit(zumoaddress, kjoremodus); 
+
+  if (String(topic) == "message warning"){//Node-RED melder direkte til ESP om kvote er over 90% med topic "message warning"
+      sendWhatsAppMessage(message, phoneNumber, apiKey); // sender melding (denne funksjonen brukes da senere i programmet hvor man skal varsle brukeren) 
 }
+
+
 
 //This function counts the amount of sharp turns made by the zumo car
 void receiveEvent(int howMany){
